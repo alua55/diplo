@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>FastFoodGo</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>`r`n<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;font-family:'DM Sans',sans-serif}
+#root{min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.3);border-radius:3px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{transform:translateX(110%)}to{transform:translateX(0)}}
+@keyframes dropDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn 0.35s ease forwards}
+.drop-down{animation:dropDown 0.2s ease forwards}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useRef,useCallback,createContext,useContext}=React;
+
+const TR={
+kz:{
+  app:"FastFoodGo",tagline:"Тез және ыстық.",sub:"Алматының жүздеген мейрамханасы — бір қосымшада",
+  searchP:"Мейрамхана іздеу...",cart:"Себет",admin:"Әкімші",back:"← Артқа",
+  home:"Басты бет",free:"Тегін",min:"мин",login:"Кіру",logout:"Шығу",register:"Тіркелу",
+  email:"Email",pass:"Құпия сөз",name:"Аты-жөні",phone:"Телефон",
+  loginBtn:"Кіру",regBtn:"Тіркелу",noAcc:"Аккаунт жоқ па?",hasAcc:"Аккаунт бар ма?",
+  adminPanel:"Әкімші панелі",adminHint:"admin@ffgo.kz / Admin@2025!",wrongCred:"Қате логин немесе пароль",
+  emptyCart:"Себет бос",goMenu:"Менюге өту",checkout:"Тапсырыс беру",
+  subtotal:"Жиын",delivery:"Жеткізу",discount:"Жеңілдік",total:"Барлығы",
+  promo:"Промокод",apply:"Қолдану",promoOk:"✅ FIRST20 қолданылды!",promoErr:"Промокод табылмады",
+  address:"Жеткізу мекенжайы",payment:"Төлем тәсілі",secure:"🔒 Қауіпсіз SSL",
+  freeHint:"5000₸-дан жоғары — жеткізу тегін!",trackOrder:"Тапсырысты қадағалау",
+  liveMap:"Live карта",etaLabel:"Күтілетін уақыт",courierName:"Асан Қ.",
+  callC:"📞 Қоңырау",chatC:"💬 Чат",sendMsg:"Жіберу",noMsg:"Хабар жоқ",
+  myProfile:"Менің профилім",myOrders:"Тапсырыстарым",myAddr:"Мекенжайларым",myFav:"Таңдаулылар",
+  saveBtn:"Сақтау",addAddr:"+ Мекенжай қосу",editAddr:"Өзгерту",delAddr:"Өшіру",
+  noFav:"Таңдаулылар жоқ",noOrders:"Тапсырыстар жоқ",addrPlaceholder:"Мекенжай енгізіңіз...",
+  online:"🟢 Онлайн",offline:"⚫ Оффлайн",
+  stats:"Статистика",earnings:"Табыс",orders:"Тапсырыстар",rating:"Рейтинг",
+  dashboard:"Дашборд",couriers:"Курьерлер",restaurantsT:"Мейрамханалар",ordersT:"Тапсырыстар",
+  addRest:"+ Мейрамхана қосу",editR:"✏️ Өзгерту",delR:"🗑 Өшіру",
+  restName:"Мейрамхана атауы",restCat:"Санат",restImg:"Сурет URL",restTime:"Уақыт (мыс: 20-30)",
+  saveRest:"Сақтау",cancelR:"Болдырмау",
+  salesChart:"Сағаттық сатылым",topRest:"Үздік мейрамханалар",latestOrders:"Соңғы тапсырыстар",
+  catAll:"Барлығы",catBurgers:"Бургерлер",catPizza:"Пицца",catSushi:"Суши",
+  catAsia:"Азия",catSh:"Шаурма",catH:"Пайдалы тамақ",catDessert:"Десерттер",catKazakh:"Қазақша",
+  promoBanner:"Бірінші тапсырысқа 20% жеңілдік!",promoCode:"Промокод: FIRST20",
+  light:"☀️",dark:"🌙",
+  os0:"Тапсырыс қабылданды",os1:"Дайындалуда",os2:"Берілуге дайын",os3:"Курьер алды",os4:"Жеткізілді!",
+  oi0:"✅",oi1:"👨‍🍳",oi2:"📦",oi3:"🛵",oi4:"🎉",
+  popular:"Хит",addCart:"+ Қосу",cal:"ккал",
+  regExists:"Бұл email тіркелген",pending:"Тапсырыстар",regRequired:"Барлық өрістерді толтырыңыз",
+  mapHint:"Картада таңдаңыз немесе мекенжай енгізіңіз",
+},
+ru:{
+  app:"FastFoodGo",tagline:"Быстро и горячо.",sub:"Сотни ресторанов Алматы — в одном приложении",
+  searchP:"Поиск ресторана...",cart:"Корзина",admin:"Админ",back:"← Назад",
+  home:"На главную",free:"Бесплатно",min:"мин",login:"Войти",logout:"Выйти",register:"Регистрация",
+  email:"Email",pass:"Пароль",name:"Имя и фамилия",phone:"Телефон",
+  loginBtn:"Войти",regBtn:"Зарегистрироваться",noAcc:"Нет аккаунта?",hasAcc:"Есть аккаунт?",
+  adminPanel:"Панель администратора",adminHint:"admin@ffgo.kz / Admin@2025!",wrongCred:"Неверный логин или пароль",
+  emptyCart:"Корзина пуста",goMenu:"Перейти к меню",checkout:"Оформить заказ",
+  subtotal:"Подытог",delivery:"Доставка",discount:"Скидка",total:"Итого",
+  promo:"Промокод",apply:"OK",promoOk:"✅ FIRST20 применён!",promoErr:"Промокод не найден",
+  address:"Адрес доставки",payment:"Способ оплаты",secure:"🔒 Безопасная оплата SSL",
+  freeHint:"Бесплатная доставка от 5000₸!",trackOrder:"Отслеживание заказа",
+  liveMap:"Live карта",etaLabel:"Ожидаемое время",courierName:"Асан К.",
+  callC:"📞 Позвонить",chatC:"💬 Написать",sendMsg:"Отправить",noMsg:"Сообщений нет",
+  myProfile:"Мой профиль",myOrders:"Мои заказы",myAddr:"Мои адреса",myFav:"Избранное",
+  saveBtn:"Сохранить",addAddr:"+ Добавить адрес",editAddr:"Изменить",delAddr:"Удалить",
+  noFav:"Избранных нет",noOrders:"Заказов ещё нет",addrPlaceholder:"Введите адрес...",
+  online:"🟢 Онлайн",offline:"⚫ Офлайн",
+  stats:"Статистика",earnings:"Заработок",orders:"Заказы",rating:"Рейтинг",
+  dashboard:"Дашборд",couriers:"Курьеры",restaurantsT:"Рестораны",ordersT:"Заказы",
+  addRest:"+ Добавить ресторан",editR:"✏️ Изменить",delR:"🗑 Удалить",
+  restName:"Название",restCat:"Категория",restImg:"URL фото",restTime:"Время (напр: 20-30)",
+  saveRest:"Сохранить",cancelR:"Отмена",
+  salesChart:"Продажи по часам",topRest:"Топ рестораны",latestOrders:"Последние заказы",
+  catAll:"Все",catBurgers:"Бургеры",catPizza:"Пицца",catSushi:"Суши",
+  catAsia:"Азия",catSh:"Шаурма",catH:"Здоровое",catDessert:"Десерты",catKazakh:"Казахская",
+  promoBanner:"Скидка 20% на первый заказ!",promoCode:"Промокод: FIRST20",
+  light:"☀️",dark:"🌙",
+  os0:"Заказ принят",os1:"Готовится",os2:"Готов к выдаче",os3:"Курьер забрал",os4:"Доставлено!",
+  oi0:"✅",oi1:"👨‍🍳",oi2:"📦",oi3:"🛵",oi4:"🎉",
+  popular:"Хит",addCart:"+ Добавить",cal:"ккал",
+  regExists:"Этот email уже зарегистрирован",pending:"Заказы",regRequired:"Заполните все поля",
+  mapHint:"Выберите на карте или введите адрес вручную",
+},
+en:{
+  app:"FastFoodGo",tagline:"Fast and hot.",sub:"Hundreds of Almaty restaurants — one app",
+  searchP:"Search restaurant...",cart:"Cart",admin:"Admin",back:"← Back",
+  home:"Home",free:"Free",min:"min",login:"Sign in",logout:"Sign out",register:"Sign up",
+  email:"Email",pass:"Password",name:"Full name",phone:"Phone",
+  loginBtn:"Sign in",regBtn:"Create account",noAcc:"No account?",hasAcc:"Have account?",
+  adminPanel:"Admin panel",adminHint:"admin@ffgo.kz / Admin@2025!",wrongCred:"Invalid login or password",
+  emptyCart:"Cart is empty",goMenu:"Browse menu",checkout:"Place order",
+  subtotal:"Subtotal",delivery:"Delivery",discount:"Discount",total:"Total",
+  promo:"Promo code",apply:"Apply",promoOk:"✅ FIRST20 applied!",promoErr:"Promo code not found",
+  address:"Delivery address",payment:"Payment method",secure:"🔒 Secure SSL payment",
+  freeHint:"Free delivery over 5000₸!",trackOrder:"Track order",
+  liveMap:"Live map",etaLabel:"Estimated time",courierName:"Asan K.",
+  callC:"📞 Call",chatC:"💬 Message",sendMsg:"Send",noMsg:"No messages",
+  myProfile:"My profile",myOrders:"My orders",myAddr:"My addresses",myFav:"Favorites",
+  saveBtn:"Save",addAddr:"+ Add address",editAddr:"Edit",delAddr:"Delete",
+  noFav:"No favorites yet",noOrders:"No orders yet",addrPlaceholder:"Enter address...",
+  online:"🟢 Online",offline:"⚫ Offline",
+  stats:"Statistics",earnings:"Earnings",orders:"Orders",rating:"Rating",
+  dashboard:"Dashboard",couriers:"Couriers",restaurantsT:"Restaurants",ordersT:"Orders",
+  addRest:"+ Add restaurant",editR:"✏️ Edit",delR:"🗑 Delete",
+  restName:"Name",restCat:"Category",restImg:"Photo URL",restTime:"Time (e.g. 20-30)",
+  saveRest:"Save",cancelR:"Cancel",
+  salesChart:"Hourly sales",topRest:"Top restaurants",latestOrders:"Latest orders",
+  catAll:"All",catBurgers:"Burgers",catPizza:"Pizza",catSushi:"Sushi",
+  catAsia:"Asian",catSh:"Shawarma",catH:"Healthy",catDessert:"Desserts",catKazakh:"Kazakh",
+  promoBanner:"20% off your first order!",promoCode:"Code: FIRST20",
+  light:"☀️",dark:"🌙",
+  os0:"Order placed",os1:"Preparing",os2:"Ready for pickup",os3:"Courier picked up",os4:"Delivered!",
+  oi0:"✅",oi1:"👨‍🍳",oi2:"📦",oi3:"🛵",oi4:"🎉",
+  popular:"Hit",addCart:"+ Add",cal:"kcal",
+  regExists:"This email is already registered",pending:"Orders",regRequired:"Fill in all fields",
+  mapHint:"Pick on map or type address manually",
+}};
+
+const ThemeCtx=createContext({});
+const useApp=()=>useContext(ThemeCtx);
+
+const ORDERS_KEY="ffg_orders_global";
+const COURIERS_KEY="ffg_couriers_live";
+
+function getT(dark){
+  return dark?{
+    bg:"#0a0a0f",card:"#13131a",cardHover:"#1a1a24",glass:"rgba(255,255,255,0.04)",
+    accent:"#f5a623",accentD:"#c8861a",glow:"rgba(245,166,35,0.18)",
+    blue:"#3b82f6",green:"#22c55e",red:"#ef4444",
+    text:"#f0eff4",muted:"#8b8a99",sub:"#5a5970",
+    border:"rgba(255,255,255,0.07)",borderH:"rgba(245,166,35,0.3)",
+    nav:"rgba(10,10,15,0.92)",inp:"#13131a",
+  }:{
+    bg:"#f4f3ef",card:"#ffffff",cardHover:"#f8f7f3",glass:"rgba(0,0,0,0.03)",
+    accent:"#e8920a",accentD:"#c47a08",glow:"rgba(232,146,10,0.14)",
+    blue:"#2563eb",green:"#16a34a",red:"#dc2626",
+    text:"#1a1914",muted:"#6b6960",sub:"#9c9b94",
+    border:"rgba(0,0,0,0.08)",borderH:"rgba(232,146,10,0.38)",
+    nav:"rgba(244,243,239,0.93)",inp:"#ffffff",
+  };
+}
+
+function lsGet(key,def){try{const v=localStorage.getItem(key);return v!==null?JSON.parse(v):def;}catch{return def;}}
+function lsSet(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch{}}
+
+function useLS(key,init){
+  const[v,sv]=useState(()=>lsGet(key,init));
+  const set=useCallback(val=>{
+    const newVal=typeof val==="function"?val(lsGet(key,init)):val;
+    sv(newVal);lsSet(key,newVal);
+  },[key]);
+  return[v,set];
+}
+
+const ADMIN_EMAIL="admin@ffgo.kz",ADMIN_PASS="Admin@2025!";
+
+const INIT_RESTAURANTS=[
+  {id:1,name:"Burger Palace",emoji:"🍔",cat:"burgers",rating:4.8,time:"20-30",free:true,tags:["popular"],disc:"10%",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80",cnt:243},
+  {id:2,name:"Pizza Roma",emoji:"🍕",cat:"pizza",rating:4.7,time:"25-35",free:false,fee:199,tags:["italian"],disc:null,img:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80",cnt:187},
+  {id:3,name:"Sushi Master",emoji:"🍱",cat:"sushi",rating:4.9,time:"30-40",free:true,tags:["premium"],disc:null,img:"https://images.unsplash.com/photo-1553621042-f6e147245754?w=600&q=80",cnt:312},
+  {id:4,name:"Wok & Roll",emoji:"🥢",cat:"asia",rating:4.6,time:"20-25",free:false,fee:150,tags:["spicy"],disc:"15%",img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=600&q=80",cnt:156},
+  {id:5,name:"Shawarma King",emoji:"🌯",cat:"shawarma",rating:4.5,time:"15-20",free:true,tags:["fast"],disc:"20%",img:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&q=80",cnt:421},
+  {id:6,name:"Green Garden",emoji:"🥗",cat:"healthy",rating:4.7,time:"25-30",free:false,fee:199,tags:["vegan"],disc:null,img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80",cnt:98},
+  {id:7,name:"Sweet Dream",emoji:"🍰",cat:"dessert",rating:4.8,time:"20-30",free:false,fee:149,tags:["sweet"],disc:"5%",img:"https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80",cnt:134},
+  {id:8,name:"Dастархан",emoji:"🍲",cat:"kazakh",rating:4.9,time:"30-45",free:true,tags:["national"],disc:null,img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80",cnt:289},
+  {id:9,name:"Tokyo Ramen",emoji:"🍜",cat:"asia",rating:4.7,time:"25-35",free:false,fee:199,tags:["ramen"],disc:null,img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&q=80",cnt:167},
+  {id:10,name:"Chicago Pizza",emoji:"🍕",cat:"pizza",rating:4.6,time:"30-40",free:true,tags:["deep-dish"],disc:"10%",img:"https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80",cnt:203},
+  {id:11,name:"BBQ House",emoji:"🥩",cat:"burgers",rating:4.8,time:"25-35",free:false,fee:249,tags:["grill"],disc:null,img:"https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80",cnt:178},
+  {id:12,name:"Osaka Sushi",emoji:"🍣",cat:"sushi",rating:4.9,time:"35-45",free:true,tags:["premium"],disc:"15%",img:"https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=600&q=80",cnt:256},
+];
+
+const MENU={
+  1:[
+    {id:101,name:"Классик Бургер",desc:"Сочная котлета, соус BBQ, маринованные огурцы",price:2490,cal:650,pop:true,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&q=80"},
+    {id:102,name:"Двойной Чизбургер",desc:"Двойная котлета, двойной сыр, спец. соус",price:3190,cal:850,pop:false,img:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=300&q=80"},
+    {id:103,name:"Куриный Бургер",desc:"Хрустящая курица, соус тар-тар, салат",price:2190,cal:520,pop:true,img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=300&q=80"},
+    {id:104,name:"Картошка фри",desc:"Хрустящий картофель с морской солью",price:890,cal:380,pop:false,img:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300&q=80"},
+    {id:105,name:"Луковые кольца",desc:"Хрустящие луковые кольца в панировке",price:790,cal:340,pop:false,img:"https://images.unsplash.com/photo-1639024471283-03518883512d?w=300&q=80"},
+    {id:106,name:"Coca-Cola 0.5л",desc:"Холодная газировка",price:490,cal:200,pop:false,img:"https://images.unsplash.com/photo-1554866585-cd94860890b7?w=300&q=80"},
+  ],
+  2:[
+    {id:201,name:"Маргарита",desc:"Томатный соус, моцарелла, базилик",price:3490,cal:720,pop:true,img:"https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=300&q=80"},
+    {id:202,name:"Пепперони",desc:"Пепперони, моцарелла, томатный соус",price:3990,cal:880,pop:true,img:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80"},
+    {id:203,name:"Четыре сыра",desc:"Моцарелла, горгонзола, пармезан, чеддер",price:4490,cal:950,pop:false,img:"https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&q=80"},
+    {id:204,name:"Карбонара",desc:"Бекон, яйца, пармезан, чёрный перец",price:4190,cal:890,pop:false,img:"https://images.unsplash.com/photo-1612874742237-6526221588e3?w=300&q=80"},
+    {id:205,name:"Гавайская",desc:"Курица, ананас, моцарелла",price:3790,cal:810,pop:true,img:"https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=300&q=80"},
+  ],
+  3:[
+    {id:301,name:"Ролл Калифорния",desc:"Краб, авокадо, огурец, кунжут",price:2890,cal:420,pop:true,img:"https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=300&q=80"},
+    {id:302,name:"Сашими Лосось",desc:"Свежий лосось, 8 кусков",price:4290,cal:350,pop:true,img:"https://images.unsplash.com/photo-1553621042-f6e147245754?w=300&q=80"},
+    {id:303,name:"Нигири Тунец",desc:"Рис, свежий тунец, васаби",price:3490,cal:380,pop:false,img:"https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&q=80"},
+    {id:304,name:"Дракон Ролл",desc:"Угорь, авокадо, огурец, спайси соус",price:3990,cal:510,pop:true,img:"https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=300&q=80"},
+    {id:305,name:"Мисо суп",desc:"Тофу, водоросли, зелёный лук",price:890,cal:95,pop:false,img:"https://images.unsplash.com/photo-1547592166-23ac45744acd?w=300&q=80"},
+  ],
+  4:[
+    {id:401,name:"Пад Тай",desc:"Рисовая лапша, креветки, яйцо, арахис",price:2990,cal:580,pop:true,img:"https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=300&q=80"},
+    {id:402,name:"Том Ям",desc:"Острый суп с креветками и грибами",price:2490,cal:320,pop:true,img:"https://images.unsplash.com/photo-1547592166-23ac45744acd?w=300&q=80"},
+    {id:403,name:"Вок с курицей",desc:"Курица, перец, соус терияки, рис",price:2190,cal:490,pop:false,img:"https://images.unsplash.com/photo-1512058454905-6b841e7ad132?w=300&q=80"},
+    {id:404,name:"Карри Красное",desc:"Кокосовое молоко, курица, тайское карри",price:2890,cal:540,pop:false,img:"https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=300&q=80"},
+    {id:405,name:"Жареный рис",desc:"Рис, яйцо, овощи, соус",price:1890,cal:460,pop:false,img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=300&q=80"},
+  ],
+  5:[
+    {id:501,name:"Шаурма Classic",desc:"Курица, овощи, чесночный соус, лаваш",price:1490,cal:520,pop:true,img:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=300&q=80"},
+    {id:502,name:"Шаурма Double",desc:"Двойная порция мяса, два соуса",price:2190,cal:780,pop:true,img:"https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=300&q=80"},
+    {id:503,name:"Хот-дог",desc:"Сосиска, горчица, кетчуп, огурец",price:990,cal:380,pop:false,img:"https://images.unsplash.com/photo-1612392061787-2d1bb0e0e880?w=300&q=80"},
+    {id:504,name:"Донер Кебаб",desc:"Говядина, овощи, йогуртовый соус",price:1790,cal:610,pop:false,img:"https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=300&q=80"},
+    {id:505,name:"Самса",desc:"Слоёное тесто, мясо, лук",price:590,cal:290,pop:true,img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&q=80"},
+  ],
+  6:[
+    {id:601,name:"Греческий салат",desc:"Огурцы, помидоры, оливки, фета",price:1990,cal:280,pop:true,img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&q=80"},
+    {id:602,name:"Боул с киноа",desc:"Киноа, авокадо, нут, тахини",price:2490,cal:420,pop:true,img:"https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&q=80"},
+    {id:603,name:"Смузи-боул",desc:"Манго, банан, черника, гранола",price:1790,cal:350,pop:false,img:"https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=300&q=80"},
+    {id:604,name:"Авокадо-тост",desc:"Цельнозерновой хлеб, авокадо, яйцо пашот",price:1590,cal:380,pop:false,img:"https://images.unsplash.com/photo-1541519227354-08fa5d50c820?w=300&q=80"},
+    {id:605,name:"Детокс смузи",desc:"Шпинат, яблоко, имбирь, лимон",price:990,cal:120,pop:false,img:"https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=300&q=80"},
+  ],
+  7:[
+    {id:701,name:"Тирамису",desc:"Маскарпоне, кофе, дамские пальчики",price:1490,cal:420,pop:true,img:"https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=300&q=80"},
+    {id:702,name:"Чизкейк NY",desc:"Нью-Йоркский чизкейк с ягодами",price:1390,cal:480,pop:true,img:"https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=300&q=80"},
+    {id:703,name:"Шоколадный фондан",desc:"Тёплый торт с жидким шоколадом",price:1290,cal:510,pop:true,img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=300&q=80"},
+    {id:704,name:"Макарон набор",desc:"6 видов макарон, ассорти",price:1890,cal:380,pop:false,img:"https://images.unsplash.com/photo-1558326567-98166e232c52?w=300&q=80"},
+    {id:705,name:"Панна котта",desc:"Сливки, ваниль, ягодный соус",price:1190,cal:320,pop:false,img:"https://images.unsplash.com/photo-1488477181946-6428a0291777?w=300&q=80"},
+  ],
+  8:[
+    {id:801,name:"Бешбармак",desc:"Баранина, домашняя лапша, лук, сорпа",price:3990,cal:820,pop:true,img:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&q=80"},
+    {id:802,name:"Куырдак",desc:"Субпродукты, лук, картошка",price:2490,cal:650,pop:true,img:"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=300&q=80"},
+    {id:803,name:"Манты",desc:"Говядина, лук, тесто на пару",price:2190,cal:590,pop:true,img:"https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=300&q=80"},
+    {id:804,name:"Лагман",desc:"Тянутая лапша, мясо, овощи, соус",price:2290,cal:560,pop:false,img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&q=80"},
+    {id:805,name:"Самса с мясом",desc:"Слоёное тесто, фарш, специи",price:490,cal:280,pop:false,img:"https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=300&q=80"},
+    {id:806,name:"Шашлык",desc:"Маринованная баранина на углях",price:3490,cal:680,pop:true,img:"https://images.unsplash.com/photo-1544025162-d76694265947?w=300&q=80"},
+  ],
+  9:[
+    {id:901,name:"Рамен Тонкоцу",desc:"Свиной бульон, яйцо, бамбук, нори",price:3190,cal:650,pop:true,img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&q=80"},
+    {id:902,name:"Рамен Мисо",desc:"Мисо-бульон, тофу, зелёный лук",price:2890,cal:520,pop:false,img:"https://images.unsplash.com/photo-1557872943-16a5ac26437e?w=300&q=80"},
+    {id:903,name:"Гёдза",desc:"Жареные пельмени с свининой",price:1890,cal:380,pop:true,img:"https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=300&q=80"},
+    {id:904,name:"Такояки",desc:"Шарики с осьминогом, соус бонито",price:2190,cal:410,pop:false,img:"https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=300&q=80"},
+  ],
+  10:[
+    {id:1001,name:"Чикаго Дип-диш",desc:"Глубокая пицца с тремя видами сыра",price:4990,cal:1100,pop:true,img:"https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&q=80"},
+    {id:1002,name:"Пицца Дьявола",desc:"Острая салями, чили, моцарелла",price:4290,cal:930,pop:true,img:"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80"},
+    {id:1003,name:"Морская пицца",desc:"Морепродукты, томат, рукола",price:5490,cal:870,pop:false,img:"https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=300&q=80"},
+    {id:1004,name:"Стикс чесночные",desc:"Хрустящие палочки, чесночный соус",price:990,cal:320,pop:false,img:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300&q=80"},
+  ],
+  11:[
+    {id:1101,name:"Рибай стейк",desc:"Мраморная говядина, 300г, гриль",price:7990,cal:890,pop:true,img:"https://images.unsplash.com/photo-1544025162-d76694265947?w=300&q=80"},
+    {id:1102,name:"Бургер BBQ",desc:"Говядина, бекон, соус BBQ, сыр",price:3490,cal:820,pop:true,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&q=80"},
+    {id:1103,name:"Рёбра свиные",desc:"Копчёные рёбра, соус мёд-горчица",price:5490,cal:960,pop:false,img:"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=300&q=80"},
+    {id:1104,name:"Куриные крылья",desc:"Острые крылья buffalo, соус ранч",price:2490,cal:640,pop:true,img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=300&q=80"},
+    {id:1105,name:"Кукуруза гриль",desc:"Кукуруза, масло, специи",price:690,cal:180,pop:false,img:"https://images.unsplash.com/photo-1604080428207-f585aaaebf2a?w=300&q=80"},
+  ],
+  12:[
+    {id:1201,name:"Омакасе сет",desc:"Шеф-подборка: 12 нигири + суп",price:8990,cal:680,pop:true,img:"https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=300&q=80"},
+    {id:1202,name:"Ролл Филадельфия",desc:"Лосось, крем-сыр, огурец",price:3490,cal:490,pop:true,img:"https://images.unsplash.com/photo-1617196034183-421b4040ed20?w=300&q=80"},
+    {id:1203,name:"Темпура",desc:"Креветки в кляре, соус тен-цую",price:3190,cal:520,pop:false,img:"https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=300&q=80"},
+    {id:1204,name:"Рамен с уткой",desc:"Утиный бульон, яйцо, рикотта",price:4290,cal:610,pop:false,img:"https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=300&q=80"},
+    {id:1205,name:"Моти набор",desc:"6 шт рисовых пирожных: матча, манго, клубника",price:2190,cal:390,pop:true,img:"https://images.unsplash.com/photo-1558326567-98166e232c52?w=300&q=80"},
+  ],
+};
+
+const CATS=["all","burgers","pizza","sushi","asia","shawarma","healthy","dessert","kazakh"];
+const CAT_KEYS={all:"catAll",burgers:"catBurgers",pizza:"catPizza",sushi:"catSushi",asia:"catAsia",shawarma:"catSh",healthy:"catH",dessert:"catDessert",kazakh:"catKazakh"};
+
+const INIT_COURIERS=[
+  {id:1,name:"Асан Қ.",rating:4.9,del:347,status:"🟢",statusText:"Онлайн",earn:14500,phone:"+7 777 111 22 33"},
+  {id:2,name:"Болат Р.",rating:4.7,del:213,status:"🟡",statusText:"Жолда",earn:8200,phone:"+7 777 444 55 66"},
+  {id:3,name:"Нурлан С.",rating:4.8,del:189,status:"🔴",statusText:"Офлайн",earn:0,phone:"+7 777 777 88 99"},
+];
+
+// Almaty area map pins for delivery
+const ALMATY_PINS=[
+  {name:"Алматы орталығы",lat:43.222,lng:76.851,addr:"Алматы, Бөгенбай батыр көш."},
+  {name:"Достык даңғылы",lat:43.235,lng:76.942,addr:"Алматы, Достык даңғылы, 240"},
+  {name:"Абай даңғылы",lat:43.218,lng:76.912,addr:"Алматы, Абай даңғылы, 44"},
+  {name:"Арбат",lat:43.259,lng:76.911,addr:"Алматы, Жібек жолы, 48"},
+  {name:"EXPO",lat:43.211,lng:76.875,addr:"Алматы, Аль-Фараби, 17"},
+  {name:"Медеу",lat:43.172,lng:77.003,addr:"Алматы, Медеу шаңырағы"},
+  {name:"Мега",lat:43.198,lng:76.858,addr:"Алматы, Розыбакиев, 247а"},
+  {name:"Алматы-1 вокзал",lat:43.254,lng:76.891,addr:"Алматы, Байзақов, 1"},
+];
+
+const YANDEX_ROUTE=[
+  [43.259,76.911],
+  [43.248,76.904],
+  [43.238,76.895],
+  [43.228,76.884],
+  [43.218,76.872],
+  [43.198,76.858]
+];
+
+function useYandexReady(){
+  const[ready,setReady]=useState(()=>!!(window.ymaps&&window.ymaps.Map));
+  useEffect(()=>{
+    let alive=true;
+    const wait=()=>{
+      if(window.ymaps&&window.ymaps.ready){
+        window.ymaps.ready(()=>alive&&setReady(true));
+      }else setTimeout(wait,150);
+    };
+    wait();
+    return()=>{alive=false;};
+  },[]);
+  return ready;
+}
+
+function MapFallback({children}){
+  const{dark}=useApp();const T=getT(dark);
+  return <div style={{minHeight:260,borderRadius:14,border:`1px solid ${T.border}`,background:T.cardHover,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem",textAlign:"center",color:T.muted,fontSize:13}}>
+    {children||"Yandex Maps жүктелуде..."}
+  </div>;
+}
+
+/* ══ MINI UI ══ */
+function Bdg({children,color}){
+  const{dark}=useApp();const T=getT(dark);const c=color||T.accent;
+  return <span style={{background:c+"22",color:c,border:`1px solid ${c}44`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>{children}</span>;
+}
+function Crd({children,style={},onClick}){
+  const{dark}=useApp();const T=getT(dark);
+  const[h,sh]=useState(false);
+  return <div onClick={onClick} onMouseEnter={()=>onClick&&sh(true)} onMouseLeave={()=>sh(false)} style={{
+    background:h&&onClick?T.cardHover:T.card,border:`1px solid ${h&&onClick?T.borderH:T.border}`,
+    borderRadius:18,padding:"1.1rem",cursor:onClick?"pointer":"default",
+    transition:"all 0.2s",transform:h&&onClick?"translateY(-2px)":"none",
+    boxShadow:h&&onClick?`0 6px 24px ${T.glow}`:"none",...style
+  }}>{children}</div>;
+}
+function Btn({children,onClick,v="primary",sz="md",full=false,disabled=false,style={}}){
+  const{dark}=useApp();const T=getT(dark);
+  const[h,sh]=useState(false);
+  const pad=sz==="sm"?"7px 14px":sz==="lg"?"14px 28px":"10px 20px";
+  const fs=sz==="sm"?13:sz==="lg"?15:14;
+  const bg=v==="primary"?(h?T.accentD:T.accent):v==="danger"?(h?"#b91c1c":T.red):v==="green"?(h?"#15803d":T.green):(h?T.cardHover:T.card);
+  const col=(v==="primary"||v==="danger"||v==="green")?"#fff":T.text;
+  const bord=v==="primary"||v==="danger"||v==="green"?"transparent":T.border;
+  return <button disabled={disabled} onClick={onClick} onMouseEnter={()=>sh(true)} onMouseLeave={()=>sh(false)}
+    style={{background:bg,color:col,border:`1px solid ${bord}`,borderRadius:11,padding:pad,fontSize:fs,fontWeight:600,
+    cursor:disabled?"not-allowed":"pointer",opacity:disabled?0.5:1,transition:"all 0.17s",outline:"none",
+    width:full?"100%":"auto",fontFamily:"'DM Sans',sans-serif",...style}}>{children}</button>;
+}
+function Inp({value,onChange,placeholder,type="text",style={},onKeyDown}){
+  const{dark}=useApp();const T=getT(dark);
+  const[f,sf]=useState(false);
+  return <input value={value} onChange={onChange} type={type} placeholder={placeholder}
+    onFocus={()=>sf(true)} onBlur={()=>sf(false)} onKeyDown={onKeyDown}
+    style={{width:"100%",background:T.inp,border:`1px solid ${f?T.accent:T.border}`,borderRadius:11,
+    padding:"11px 14px",fontSize:14,color:T.text,outline:"none",boxShadow:f?`0 0 0 3px ${T.glow}`:"none",
+    transition:"all 0.18s",fontFamily:"'DM Sans',sans-serif",...style}}/>;
+}
+function Sel({value,onChange,children,style={}}){
+  const{dark}=useApp();const T=getT(dark);
+  return <select value={value} onChange={onChange} style={{width:"100%",background:T.inp,color:T.text,
+    border:`1px solid ${T.border}`,borderRadius:11,padding:"11px 14px",fontSize:14,outline:"none",
+    cursor:"pointer",fontFamily:"'DM Sans',sans-serif",...style}}>{children}</select>;
+}
+function Toast({msg,onClose}){
+  const{dark}=useApp();const T=getT(dark);
+  useEffect(()=>{const t=setTimeout(onClose,2800);return()=>clearTimeout(t);},[]);
+  return <div style={{position:"fixed",top:72,right:16,zIndex:9999,background:T.card,
+    border:`1px solid ${T.green}`,borderRadius:12,padding:"11px 18px",color:T.green,
+    fontWeight:600,fontSize:13,boxShadow:`0 4px 20px ${T.glow}`,animation:"slideIn 0.3s ease",
+    maxWidth:300}}>{msg}</div>;
+}
+function Modal({title,children,onClose}){
+  const{dark}=useApp();const T=getT(dark);
+  return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:5000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
+    <Crd style={{width:"100%",maxWidth:460,maxHeight:"90vh",overflowY:"auto",position:"relative",zIndex:5001}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.25rem"}}>
+        <h3 style={{fontWeight:800,fontFamily:"'Syne',sans-serif",color:T.text,fontSize:18}}>{title}</h3>
+        <button onClick={onClose} style={{background:"none",border:"none",color:T.muted,fontSize:24,cursor:"pointer",lineHeight:1,padding:"0 4px"}}>×</button>
+      </div>
+      {children}
+    </Crd>
+  </div>;
+}
+
+/* ══ DELIVERY MAP (SVG-based Almaty map) ══ */
+function DeliveryMap({selectedPin,onSelectPin}){
+  const{dark}=useApp();const T=getT(dark);
+  const ready=useYandexReady();
+  const mapRef=useRef(null),mapObj=useRef(null),marksRef=useRef([]);
+
+  useEffect(()=>{
+    if(!ready||!mapRef.current||mapObj.current)return;
+    const ym=window.ymaps;
+    const map=new ym.Map(mapRef.current,{center:[43.2389,76.8897],zoom:12,controls:["zoomControl","geolocationControl","fullscreenControl"]});
+    mapObj.current=map;
+    marksRef.current=ALMATY_PINS.map((pin,i)=>{
+      const mark=new ym.Placemark([pin.lat,pin.lng],{hintContent:pin.name,balloonContent:`<strong>${pin.name}</strong><br/>${pin.addr}`},{preset:"islands#orangeDotIcon"});
+      mark.events.add("click",()=>onSelectPin(i));
+      map.geoObjects.add(mark);
+      return mark;
+    });
+    return()=>{map.destroy();mapObj.current=null;marksRef.current=[];};
+  },[ready,onSelectPin]);
+
+  useEffect(()=>{
+    if(!mapObj.current||selectedPin===null)return;
+    const ym=window.ymaps;
+    const pin=ALMATY_PINS[selectedPin];
+    mapObj.current.setCenter([pin.lat,pin.lng],15,{duration:250});
+    marksRef.current.forEach((mark,i)=>mark.options.set("preset",i===selectedPin?"islands#redIcon":"islands#orangeDotIcon"));
+    marksRef.current[selectedPin]?.balloon.open();
+  },[selectedPin]);
+
+  if(!ready)return <MapFallback/>;
+  return <div style={{position:"relative",borderRadius:14,overflow:"hidden",border:`1px solid ${T.border}`,background:T.cardHover}}>
+    <div ref={mapRef} style={{height:300,width:"100%"}}/>
+    <div style={{padding:"0.55rem 0.7rem",borderTop:`1px solid ${T.border}`,fontSize:12,color:T.muted,background:T.card}}>
+      📍 {selectedPin!==null?ALMATY_PINS[selectedPin].addr:"Картадан нүкте таңдаңыз"}
+    </div>
+  </div>;
+}
+/* ══ COURIER MAP ══ */
+function CourierMap({status}){
+  const{dark}=useApp();const T=getT(dark);
+  const ready=useYandexReady();
+  const mapRef=useRef(null),mapObj=useRef(null),courierRef=useRef(null),routeRef=useRef(null),timerRef=useRef(null);
+  const progress=status==="arrived"?1:status==="pickup"?.68:status==="ready"?.36:status==="preparing"?.16:.04;
+
+  useEffect(()=>{
+    if(!ready||!mapRef.current||mapObj.current)return;
+    const ym=window.ymaps;
+    const map=new ym.Map(mapRef.current,{center:[43.229,76.884],zoom:12,controls:["zoomControl","fullscreenControl"]});
+    mapObj.current=map;
+    routeRef.current=new ym.Polyline(YANDEX_ROUTE,{}, {strokeColor:T.accent,strokeWidth:4,strokeOpacity:.85});
+    map.geoObjects.add(routeRef.current);
+    map.geoObjects.add(new ym.Placemark(YANDEX_ROUTE[0],{hintContent:"Мейрамхана"},{preset:"islands#greenFoodIcon"}));
+    map.geoObjects.add(new ym.Placemark(YANDEX_ROUTE[YANDEX_ROUTE.length-1],{hintContent:"Клиент"},{preset:"islands#blueHomeIcon"}));
+    courierRef.current=new ym.Placemark(YANDEX_ROUTE[0],{hintContent:"Курьер"},{preset:"islands#orangeCircleDotIcon"});
+    map.geoObjects.add(courierRef.current);
+    map.setBounds(map.geoObjects.getBounds(),{checkZoomRange:true,zoomMargin:30});
+    return()=>{clearInterval(timerRef.current);map.destroy();mapObj.current=null;courierRef.current=null;routeRef.current=null;};
+  },[ready,dark]);
+
+  useEffect(()=>{
+    if(!courierRef.current)return;
+    const lerp=(a,b,t)=>a+(b-a)*t;
+    const pointAt=t=>{
+      const max=YANDEX_ROUTE.length-1;
+      const i=Math.min(Math.floor(t*max),max-1);
+      const local=t*max-i;
+      const a=YANDEX_ROUTE[i],b=YANDEX_ROUTE[i+1];
+      return [lerp(a[0],b[0],local),lerp(a[1],b[1],local)];
+    };
+    let current=0;
+    clearInterval(timerRef.current);
+    timerRef.current=setInterval(()=>{
+      current+=(progress-current)*.12;
+      courierRef.current.geometry.setCoordinates(pointAt(current));
+    },120);
+    return()=>clearInterval(timerRef.current);
+  },[progress]);
+
+  if(!ready)return <MapFallback/>;
+  return <div style={{position:"relative",height:300,borderRadius:14,overflow:"hidden",background:T.cardHover}}>
+    <div ref={mapRef} style={{height:"100%",width:"100%"}}/>
+    <div style={{position:"absolute",left:12,bottom:12,background:T.card,color:T.text,border:`1px solid ${T.border}`,borderRadius:10,padding:"6px 10px",fontSize:12,boxShadow:"0 8px 24px rgba(0,0,0,.18)"}}>🛵 Курьер жолда</div>
+  </div>;
+}
+/* ══ USER DROPDOWN ══ */
+function UserDropdown({user,nav,doLogout}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const[open,setOpen]=useState(false);
+  const ref=useRef(null);
+  useEffect(()=>{
+    const handler=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};
+    document.addEventListener("mousedown",handler);
+    return()=>document.removeEventListener("mousedown",handler);
+  },[]);
+  const ff="'Syne',sans-serif";
+  const items=user.isAdmin
+    ?[{icon:"⚙️",label:L.adminPanel,action:()=>{nav("admin");setOpen(false);}},
+      {icon:"↩",label:L.logout,action:()=>{doLogout();setOpen(false);},danger:true}]
+    :[{icon:"👤",label:L.myProfile,action:()=>{nav("account");setOpen(false);}},
+      {icon:"📦",label:L.myOrders,action:()=>{nav("account");setOpen(false);}},
+      {icon:"❤️",label:L.myFav,action:()=>{nav("account");setOpen(false);}},
+      {icon:"↩",label:L.logout,action:()=>{doLogout();setOpen(false);},danger:true}];
+  return <div ref={ref} style={{position:"relative"}}>
+    <button onClick={()=>setOpen(o=>!o)} style={{
+      display:"flex",alignItems:"center",gap:7,background:open?T.accent+"22":T.card,
+      border:`1px solid ${open?T.accent:T.border}`,borderRadius:10,padding:"6px 11px",
+      cursor:"pointer",color:T.text,fontSize:13,fontWeight:600,transition:"all 0.18s",outline:"none"
+    }}>
+      <div style={{width:24,height:24,borderRadius:"50%",background:T.accent+"33",border:`1.5px solid ${T.accent}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0}}>
+        {user.isAdmin?"⚙️":"👤"}
+      </div>
+      <span style={{maxWidth:90,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+        {user.isAdmin?"Admin":user.name.split(" ")[0]}
+      </span>
+      <span style={{fontSize:10,opacity:0.6,display:"inline-block",transform:open?"rotate(180deg)":"none",transition:"transform 0.2s"}}>▼</span>
+    </button>
+    {open&&<div className="drop-down" style={{
+      position:"absolute",top:"calc(100% + 8px)",right:0,minWidth:200,
+      background:T.card,border:`1px solid ${T.border}`,borderRadius:14,
+      boxShadow:`0 8px 32px rgba(0,0,0,0.18)`,zIndex:500,overflow:"hidden",padding:"6px"
+    }}>
+      <div style={{padding:"8px 12px 6px",borderBottom:`1px solid ${T.border}`,marginBottom:4}}>
+        <div style={{fontWeight:700,fontSize:13,color:T.text,fontFamily:ff}}>{user.name}</div>
+        <div style={{fontSize:11,color:T.muted,marginTop:1}}>{user.email}</div>
+      </div>
+      {items.map((item,i)=><button key={i} onClick={item.action} style={{
+        display:"flex",alignItems:"center",gap:9,width:"100%",padding:"9px 12px",
+        background:"transparent",border:"none",borderRadius:9,cursor:"pointer",
+        color:item.danger?T.red:T.text,fontSize:13,fontWeight:item.danger?600:400,
+        textAlign:"left",transition:"background 0.15s"
+      }}
+        onMouseEnter={e=>e.currentTarget.style.background=item.danger?T.red+"11":T.cardHover}
+        onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+      >
+        <span style={{fontSize:15,width:20,textAlign:"center"}}>{item.icon}</span>
+        {item.label}
+      </button>)}
+    </div>}
+  </div>;
+}
+
+/* ══ NAVBAR ══ */
+function Navbar({nav,cartCount,user,doLogout}){
+  const{dark,setDark,lang,setLang,L}=useApp();const T=getT(dark);
+  const[mOpen,setMOpen]=useState(false);
+  const ff="'Syne',sans-serif";
+  return <nav style={{position:"sticky",top:0,zIndex:100,background:T.nav,backdropFilter:"blur(20px)",borderBottom:`1px solid ${T.border}`,padding:"0 1rem"}}>
+    <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:58}}>
+      <span onClick={()=>nav("home")} style={{fontSize:17,fontWeight:900,fontFamily:ff,background:`linear-gradient(135deg,${T.accent},#ff6b35)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",cursor:"pointer",whiteSpace:"nowrap"}}>⚡ {L.app}</span>
+
+      {/* Desktop nav */}
+      <div style={{display:"flex",gap:6,alignItems:"center"}}>
+        <button onClick={()=>setDark(d=>!d)} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:9,padding:"6px 11px",color:T.text,cursor:"pointer",fontSize:14}}>{dark?L.light:L.dark}</button>
+        <Sel value={lang} onChange={e=>setLang(e.target.value)} style={{width:"auto",padding:"6px 10px",fontSize:13}}>
+          <option value="kz">🇰🇿</option><option value="ru">🇷🇺</option><option value="en">🇬🇧</option>
+        </Sel>
+        {user
+          ?<UserDropdown user={user} nav={nav} doLogout={doLogout}/>
+          :<Btn v="ghost" sz="sm" onClick={()=>nav("login")}>{L.login}</Btn>
+        }
+        <Btn sz="sm" onClick={()=>nav("cart")}>
+          🛒 {L.cart}
+          {cartCount>0&&<span style={{background:T.red,borderRadius:"50%",width:17,height:17,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:10,marginLeft:4,color:"#fff"}}>{cartCount}</span>}
+        </Btn>
+        {/* Hamburger for extra options on small screens */}
+        <button onClick={()=>setMOpen(m=>!m)} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:9,padding:"7px 11px",color:T.text,cursor:"pointer",fontSize:16,display:"none"}} className="mobile-menu-btn">☰</button>
+      </div>
+    </div>
+
+    {mOpen&&<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,margin:"0 8px 8px",padding:"0.9rem",display:"flex",flexDirection:"column",gap:8,position:"relative",zIndex:101}}>
+      <div style={{display:"flex",gap:8}}>
+        <button onClick={()=>setDark(d=>!d)} style={{flex:1,background:T.cardHover,border:`1px solid ${T.border}`,borderRadius:9,padding:"8px",color:T.text,cursor:"pointer"}}>{dark?L.light:L.dark}</button>
+        <Sel value={lang} onChange={e=>{setLang(e.target.value);setMOpen(false);}} style={{flex:1,padding:"8px 10px",fontSize:13}}>
+          <option value="kz">🇰🇿 Қазақша</option><option value="ru">🇷🇺 Русский</option><option value="en">🇬🇧 English</option>
+        </Sel>
+      </div>
+      {user?<>
+        {!user.isAdmin&&<Btn v="ghost" full onClick={()=>{nav("account");setMOpen(false);}}>👤 {user.name}</Btn>}
+        {user.isAdmin&&<Btn v="ghost" full onClick={()=>{nav("admin");setMOpen(false);}}>⚙️ {L.admin}</Btn>}
+        <Btn v="danger" full onClick={()=>{doLogout();setMOpen(false);}}>↩ {L.logout}</Btn>
+      </>:<>
+        <Btn full onClick={()=>{nav("login");setMOpen(false);}}>{L.login}</Btn>
+        <Btn v="ghost" full onClick={()=>{nav("register");setMOpen(false);}}>{L.register}</Btn>
+      </>}
+    </div>}
+  </nav>;
+}
+
+/* ══ AUTH PAGE ══ */
+function AuthPage({nav,onLogin,initMode="login"}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const[isLogin,sIL]=useState(initMode==="login");
+  const[name,sName]=useState(""),[email,sEmail]=useState(""),
+        [phone,sPhone]=useState(""),[pass,sPass]=useState(""),
+        [err,sErr]=useState("");
+  const ff="'Syne',sans-serif";
+  const doLogin=()=>{
+    sErr("");
+    const users=lsGet("ffg_users",[]);
+    const u=users.find(u=>u.email===email&&u.pass===pass);
+    if(u){onLogin(u);nav("home");}else sErr(L.wrongCred);
+  };
+  const doReg=()=>{
+    sErr("");
+    if(!name||!email||!pass||!phone){sErr(L.regRequired);return;}
+    const users=lsGet("ffg_users",[]);
+    if(users.find(u=>u.email===email)){sErr(L.regExists);return;}
+    const nu={id:Date.now(),name,email,phone,pass,isAdmin:false,orders:[],addresses:[],favorites:[]};
+    lsSet("ffg_users",[...users,nu]);
+    onLogin(nu);nav("home");
+  };
+  return <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
+    <div style={{width:"100%",maxWidth:400}} className="fade-in">
+      <div style={{textAlign:"center",marginBottom:"1.5rem"}}>
+        <div style={{fontSize:36}}>⚡</div>
+        <h1 style={{fontFamily:ff,fontWeight:900,fontSize:26,background:`linear-gradient(135deg,${T.accent},#ff6b35)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:"4px 0"}}>{L.app}</h1>
+      </div>
+      <Crd style={{padding:"1.75rem"}}>
+        <div style={{display:"flex",gap:8,marginBottom:"1.25rem"}}>
+          {[[true,L.loginBtn],[false,L.regBtn]].map(([il,lb])=>
+            <button key={String(il)} onClick={()=>sIL(il)} style={{flex:1,padding:"9px",borderRadius:9,border:`1px solid ${isLogin===il?T.accent:T.border}`,background:isLogin===il?T.accent+"22":"transparent",color:isLogin===il?T.accent:T.muted,fontWeight:600,cursor:"pointer",fontSize:13,transition:"all 0.18s"}}>{lb}</button>
+          )}
+        </div>
+        <div style={{display:"grid",gap:"0.6rem"}}>
+          {!isLogin&&<Inp placeholder={L.name} value={name} onChange={e=>sName(e.target.value)}/>}
+          <Inp placeholder={L.email} value={email} onChange={e=>sEmail(e.target.value)} type="email"/>
+          {!isLogin&&<Inp placeholder={L.phone} value={phone} onChange={e=>sPhone(e.target.value)}/>}
+          <Inp placeholder={L.pass} value={pass} onChange={e=>sPass(e.target.value)} type="password" onKeyDown={e=>e.key==="Enter"&&(isLogin?doLogin():doReg())}/>
+          {err&&<div style={{color:T.red,fontSize:13,padding:"8px 12px",background:T.red+"11",borderRadius:8}}>{err}</div>}
+          <Btn full sz="lg" onClick={isLogin?doLogin:doReg}>{isLogin?L.loginBtn:L.regBtn}</Btn>
+        </div>
+        <p style={{textAlign:"center",marginTop:"0.9rem",fontSize:13,color:T.muted}}>
+          {isLogin?L.noAcc:L.hasAcc}{" "}
+          <span onClick={()=>sIL(l=>!l)} style={{color:T.accent,cursor:"pointer",fontWeight:600}}>{isLogin?L.regBtn:L.loginBtn}</span>
+        </p>
+        <div style={{borderTop:`1px solid ${T.border}`,marginTop:"1.1rem",paddingTop:"0.9rem",textAlign:"center"}}>
+          <span onClick={()=>nav("admin-login")} style={{color:T.muted,fontSize:12,cursor:"pointer",textDecoration:"underline"}}>⚙️ {L.admin}</span>
+        </div>
+      </Crd>
+      <div style={{textAlign:"center",marginTop:"0.8rem"}}><Btn v="ghost" onClick={()=>nav("home")}>← {L.home}</Btn></div>
+    </div>
+  </div>;
+}
+
+/* ══ ADMIN LOGIN ══ */
+function AdminLoginPage({nav,onLogin}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const[login,sLogin]=useState(""),[pass,sPass]=useState(""),[err,sErr]=useState("");
+  const ff="'Syne',sans-serif";
+  const doLogin=()=>{
+    if(login===ADMIN_EMAIL&&pass===ADMIN_PASS){
+      const adminUser={id:"admin",name:"Admin",email:ADMIN_EMAIL,isAdmin:true};
+      onLogin(adminUser);nav("admin");
+    }else sErr(L.wrongCred);
+  };
+  return <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}}>
+    <div style={{width:"100%",maxWidth:380}} className="fade-in">
+      <Crd style={{padding:"2rem"}}>
+        <div style={{textAlign:"center",marginBottom:"1.5rem"}}>
+          <div style={{fontSize:36}}>⚙️</div>
+          <h2 style={{fontFamily:ff,fontWeight:900,fontSize:20,color:T.text,marginTop:6}}>{L.adminPanel}</h2>
+          <p style={{color:T.muted,fontSize:12,marginTop:4}}>{L.adminHint}</p>
+        </div>
+        <div style={{display:"grid",gap:"0.6rem"}}>
+          <Inp placeholder={L.email} value={login} onChange={e=>sLogin(e.target.value)} type="email"/>
+          <Inp placeholder={L.pass} value={pass} onChange={e=>sPass(e.target.value)} type="password" onKeyDown={e=>e.key==="Enter"&&doLogin()}/>
+          {err&&<div style={{color:T.red,fontSize:13,padding:"8px 12px",background:T.red+"11",borderRadius:8}}>{err}</div>}
+          <Btn full sz="lg" onClick={doLogin}>{L.loginBtn}</Btn>
+        </div>
+        <div style={{textAlign:"center",marginTop:"0.9rem"}}><Btn v="ghost" onClick={()=>nav("login")}>← {L.back}</Btn></div>
+      </Crd>
+    </div>
+  </div>;
+}
+
+/* ══ HOME ══ */
+function HomePage({nav,cart,user,restaurants,doLogout}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const[search,sSearch]=useState(""),
+        [cat,sCat]=useState("all");
+  const ff="'Syne',sans-serif";
+  const cartCount=Object.keys(cart).filter(k=>k!=="_items").reduce((a,k)=>a+cart[k],0);
+  const filtered=restaurants.filter(r=>(cat==="all"||r.cat===cat)&&r.name.toLowerCase().includes(search.toLowerCase()));
+
+  const toggleFav=useCallback((e,rId)=>{
+    e.stopPropagation();
+    if(!user||user.isAdmin)return;
+    const currentUser=lsGet("ffg_user",null);
+    if(!currentUser)return;
+    const favs=currentUser.favorites||[];
+    const next=favs.includes(rId)?favs.filter(f=>f!==rId):[...favs,rId];
+    const updated={...currentUser,favorites:next};
+    lsSet("ffg_user",updated);
+    const users=lsGet("ffg_users",[]);
+    lsSet("ffg_users",users.map(u=>u.id===updated.id?updated:u));
+    window.dispatchEvent(new CustomEvent("ffg_fav_update"));
+  },[user]);
+
+  const[favIds,setFavIds]=useState(()=>{const u=lsGet("ffg_user",null);return u?u.favorites||[]:[];});
+  useEffect(()=>{
+    const handler=()=>{const u=lsGet("ffg_user",null);setFavIds(u?u.favorites||[]:[]); };
+    window.addEventListener("ffg_fav_update",handler);
+    return()=>window.removeEventListener("ffg_fav_update",handler);
+  },[]);
+  useEffect(()=>{const u=lsGet("ffg_user",null);setFavIds(u?u.favorites||[]:[]); },[user]);
+
+  return <div style={{minHeight:"100vh",background:T.bg,color:T.text}}>
+    <Navbar nav={nav} cartCount={cartCount} user={user} doLogout={doLogout}/>
+    <div style={{maxWidth:1200,margin:"0 auto",padding:"2rem 1rem 4rem"}} className="fade-in">
+      <div style={{textAlign:"center",marginBottom:"2rem"}}>
+        <div style={{display:"inline-block",background:T.glow,border:`1px solid ${T.accent}44`,borderRadius:30,padding:"4px 14px",fontSize:12,color:T.accent,marginBottom:"0.7rem"}}>🚀 20–40 {L.min}</div>
+        <h1 style={{fontSize:"clamp(1.7rem,5vw,3rem)",fontWeight:900,margin:"0 0 0.6rem",lineHeight:1.1,fontFamily:ff}}>
+          {L.app}<br/><span style={{background:`linear-gradient(135deg,${T.accent},#ff6b35)`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{L.tagline}</span>
+        </h1>
+        <p style={{color:T.muted,fontSize:15,marginBottom:"1.25rem"}}>{L.sub}</p>
+        <Inp placeholder={"🔍  "+L.searchP} value={search} onChange={e=>sSearch(e.target.value)} style={{maxWidth:500,margin:"0 auto",display:"block"}}/>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"0.7rem",maxWidth:460,margin:"0 auto 1.75rem"}}>
+        {[["200+",L.restaurantsT],["4.8★","Rating"],["30 "+L.min,"~"]].map(([v,l])=>
+          <div key={l} style={{textAlign:"center",background:T.glass,border:`1px solid ${T.border}`,borderRadius:13,padding:"0.85rem"}}>
+            <div style={{fontSize:16,fontWeight:800,color:T.accent,fontFamily:ff}}>{v}</div>
+            <div style={{fontSize:11,color:T.muted}}>{l}</div>
+          </div>
+        )}
+      </div>
+      <div style={{background:`linear-gradient(135deg,${T.accentD},${T.accent},#ff6b35)`,borderRadius:18,padding:"1.4rem 1.8rem",marginBottom:"1.75rem",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"0.7rem"}}>
+        <div>
+          <div style={{fontSize:20,fontWeight:900,color:"#fff",fontFamily:ff}}>{L.promoBanner}</div>
+          <div style={{fontSize:13,color:"rgba(255,255,255,0.85)",marginTop:3}}>{L.promoCode}</div>
+        </div>
+        <div style={{fontSize:44}}>🎉</div>
+      </div>
+      <div style={{display:"flex",gap:"0.45rem",overflowX:"auto",marginBottom:"1.4rem",paddingBottom:4,scrollbarWidth:"none"}}>
+        {CATS.map(c=><button key={c} onClick={()=>sCat(c)} style={{background:cat===c?T.accent:T.card,color:cat===c?"#fff":T.muted,border:`1px solid ${cat===c?T.accent:T.border}`,borderRadius:28,padding:"7px 15px",fontSize:13,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",transition:"all 0.18s",outline:"none",flexShrink:0}}>{L[CAT_KEYS[c]]}</button>)}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))",gap:"1rem"}}>
+        {filtered.map(r=>(
+          <Crd key={r.id} onClick={()=>nav("restaurant",r)} style={{overflow:"hidden",padding:0}}>
+            <div style={{height:145,position:"relative",overflow:"hidden"}}>
+              <img src={r.img||"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80"} alt={r.name}
+                style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"transform 0.4s"}}
+                onMouseEnter={e=>e.currentTarget.style.transform="scale(1.06)"}
+                onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
+                onError={e=>{e.target.src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80";}}/>
+              <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(0,0,0,0.5),transparent 55%)"}}/>
+              {r.disc&&<div style={{position:"absolute",top:9,right:9,background:T.red,color:"#fff",borderRadius:7,padding:"3px 8px",fontSize:11,fontWeight:700}}>−{r.disc}</div>}
+              {user&&!user.isAdmin&&<button onClick={e=>toggleFav(e,r.id)} style={{position:"absolute",top:9,left:9,background:"rgba(0,0,0,0.45)",border:"none",borderRadius:7,padding:"4px 8px",fontSize:16,cursor:"pointer",color:"#fff"}}
+                onMouseEnter={e=>e.currentTarget.style.transform="scale(1.2)"}
+                onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
+              >{favIds.includes(r.id)?"❤️":"🤍"}</button>}
+              <div style={{position:"absolute",bottom:7,left:9,fontSize:22}}>{r.emoji||"🍽️"}</div>
+            </div>
+            <div style={{padding:"0.85rem 1rem"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
+                <div style={{fontWeight:800,fontSize:15,fontFamily:ff,color:T.text}}>{r.name}</div>
+                <span style={{color:T.accent,fontWeight:700,fontSize:13}}>★ {r.rating}</span>
+              </div>
+              <div style={{display:"flex",gap:9,fontSize:12,color:T.muted,marginBottom:7,flexWrap:"wrap"}}>
+                <span>⏱ {r.time} {L.min}</span>
+                <span>🚚 {r.free?L.free:`${r.fee}₸`}</span>
+              </div>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                {(r.tags||[]).slice(0,2).map(t=><Bdg key={t}>{t}</Bdg>)}
+              </div>
+            </div>
+          </Crd>
+        ))}
+      </div>
+    </div>
+  </div>;
+}
+
+/* ══ RESTAURANT ══ */
+function RestaurantPage({restaurant,nav,cart,setCart,addToast,user,updateUser}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const menu=MENU[restaurant.id]||[];
+  const[search,sSearch]=useState("");
+  const ff="'Syne',sans-serif";
+  const cartCount=Object.keys(cart).filter(k=>k!=="_items").reduce((a,k)=>a+cart[k],0);
+
+  const[isFav,setIsFav]=useState(()=>{
+    const u=lsGet("ffg_user",null);
+    return u&&!u.isAdmin?(u.favorites||[]).includes(restaurant.id):false;
+  });
+
+  const toggleFav=()=>{
+    if(!user||user.isAdmin)return;
+    const currentUser=lsGet("ffg_user",null);
+    if(!currentUser)return;
+    const favs=currentUser.favorites||[];
+    const next=favs.includes(restaurant.id)?favs.filter(f=>f!==restaurant.id):[...favs,restaurant.id];
+    const updated={...currentUser,favorites:next};
+    if(updateUser)updateUser(updated);
+    setIsFav(next.includes(restaurant.id));
+    addToast(next.includes(restaurant.id)?"❤️ Таңдаулыға қосылды":"💔 Таңдаулыдан өшірілді");
+  };
+
+  const addToCart=item=>{
+    setCart(prev=>{
+      const updated={...prev,[item.id]:(prev[item.id]||0)+1,_items:{...(prev._items||{}),[item.id]:item}};
+      lsSet("ffg_cart",updated);return updated;
+    });
+    addToast("🛒 "+item.name);
+  };
+  const filtered=menu.filter(i=>i.name.toLowerCase().includes(search.toLowerCase()));
+
+  return <div style={{minHeight:"100vh",background:T.bg,color:T.text}}>
+    <nav style={{position:"sticky",top:0,zIndex:100,background:T.nav,backdropFilter:"blur(20px)",borderBottom:`1px solid ${T.border}`,padding:"0 1rem"}}>
+      <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
+        <Btn v="ghost" onClick={()=>nav("home")}>{L.back}</Btn>
+        <div style={{display:"flex",gap:8}}>
+          {user&&!user.isAdmin&&<button onClick={toggleFav} style={{background:"transparent",border:`1px solid ${T.border}`,borderRadius:9,padding:"7px 11px",fontSize:16,cursor:"pointer"}}>{isFav?"❤️":"🤍"}</button>}
+          <Btn sz="sm" onClick={()=>nav("cart")}>🛒{cartCount>0&&` (${cartCount})`}</Btn>
+        </div>
+      </div>
+    </nav>
+    <div style={{maxWidth:860,margin:"0 auto",padding:"0 1rem 3rem"}} className="fade-in">
+      <div style={{height:200,borderRadius:18,overflow:"hidden",position:"relative",margin:"1rem 0"}}>
+        <img src={restaurant.img} alt={restaurant.name} style={{width:"100%",height:"100%",objectFit:"cover"}}
+          onError={e=>{e.target.src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80";}}/>
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(10,10,15,0.85),transparent 55%)"}}/>
+        <div style={{position:"absolute",bottom:14,left:18}}>
+          <h1 style={{fontSize:26,fontWeight:900,color:"#fff",fontFamily:ff,margin:"0 0 5px"}}>{restaurant.name}</h1>
+          <div style={{display:"flex",gap:12,fontSize:13,color:"rgba(255,255,255,0.8)",flexWrap:"wrap"}}>
+            <span>★ {restaurant.rating}</span><span>⏱ {restaurant.time} {L.min}</span><span>🚚 {restaurant.free?L.free:`${restaurant.fee}₸`}</span>
+          </div>
+        </div>
+      </div>
+      <Inp placeholder={"🔍 "+L.searchP} value={search} onChange={e=>sSearch(e.target.value)} style={{marginBottom:"1rem"}}/>
+      <div style={{display:"grid",gap:"0.65rem"}}>
+        {filtered.map(item=>(
+          <Crd key={item.id} style={{display:"flex",padding:0,overflow:"hidden",gap:0}}>
+            <div style={{width:85,minHeight:85,flexShrink:0,position:"relative"}}>
+              <img src={item.img} alt={item.name} style={{width:"100%",height:"100%",objectFit:"cover",position:"absolute",inset:0}}
+                onError={e=>{e.target.style.display="none";}}/>
+            </div>
+            <div style={{flex:1,padding:"0.75rem",display:"flex",flexDirection:"column",justifyContent:"space-between",minWidth:0}}>
+              <div>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
+                  <span style={{fontWeight:700,fontSize:14,color:T.text}}>{item.name}</span>
+                  {item.pop&&<Bdg color={T.green}>🔥 {L.popular}</Bdg>}
+                </div>
+                <div style={{color:T.muted,fontSize:12,marginBottom:3,lineHeight:1.4}}>{item.desc}</div>
+                <div style={{fontSize:11,color:T.sub}}>{item.cal} {L.cal}</div>
+              </div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",justifyContent:"center",gap:7,padding:"0.75rem 0.9rem",minWidth:95,flexShrink:0}}>
+              <div style={{fontWeight:800,fontSize:16,color:T.accent,whiteSpace:"nowrap"}}>{item.price.toLocaleString()}₸</div>
+              <Btn sz="sm" onClick={()=>addToCart(item)}>{cart[item.id]?`✓ ${cart[item.id]}`:L.addCart}</Btn>
+            </div>
+          </Crd>
+        ))}
+      </div>
+    </div>
+  </div>;
+}
+
+/* ══ CART ══ */
+function CartPage({nav,cart,setCart,user,updateUser,addOrderToUser}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const[promo,sPromo]=useState(""),
+        [promoOk,sPOk]=useState(false),
+        [addr,sAddr]=useState((user&&!user.isAdmin&&user.addresses&&user.addresses[0])||""),
+        [pay,sPay]=useState("card"),
+        [err,sErr]=useState(""),
+        [selectedPin,setSelectedPin]=useState(null),
+        [showMap,setShowMap]=useState(false);
+  const ff="'Syne',sans-serif";
+  const items=Object.keys(cart).filter(k=>k!=="_items").map(k=>({...(cart._items?.[k]||{id:k,name:"Блюдо",price:1000}),qty:cart[k]})).filter(i=>i.qty>0);
+  const sub=items.reduce((a,i)=>a+i.price*i.qty,0);
+  const del=sub>=5000?0:499;
+  const disc=promoOk?Math.round(sub*.2):0;
+  const total=sub+del-disc;
+
+  const updQ=(id,d)=>setCart(prev=>{
+    const nv=Math.max(0,(prev[id]||0)+d);
+    let n;
+    if(nv===0){n={...prev};delete n[id];if(n._items)delete n._items[id];}
+    else n={...prev,[id]:nv};
+    lsSet("ffg_cart",n);return n;
+  });
+
+  const selectMapPin=(i)=>{
+    setSelectedPin(i);
+    sAddr(ALMATY_PINS[i].addr);
+    setShowMap(false);
+  };
+
+  const doCheckout=()=>{
+    sErr("");
+    if(!addr.trim()){sErr(L.addrRequired||"Мекенжайды енгізіңіз");return;}
+    const now=new Date();
+    const timeStr=now.toLocaleTimeString("ru",{hour:"2-digit",minute:"2-digit"});
+    const dateStr=now.toLocaleDateString("ru");
+    const orderId=`FF-${Math.floor(Math.random()*9000)+1000}`;
+    const clientName=user&&!user.isAdmin?user.name:"Гость";
+    const firstItemId=items[0]?.id;
+    let restName="—";
+    for(const[rid,menuItems] of Object.entries(MENU)){
+      if(menuItems.find(m=>m.id===firstItemId)){
+        const r=lsGet("ffg_restaurants",INIT_RESTAURANTS).find(r=>r.id===parseInt(rid));
+        if(r)restName=r.name;break;
+      }
+    }
+    const newOrder={
+      id:orderId,client:clientName,restaurant:restName,
+      items:items.map(i=>`${i.name} × ${i.qty}`).join(", "),
+      itemsList:items.map(i=>({name:i.name,qty:i.qty,price:i.price})),
+      total,totalStr:total.toLocaleString()+"₸",
+      status:"🟢 Жеткізілді",time:timeStr,date:dateStr,address:addr,payment:pay
+    };
+    const globalOrders=lsGet(ORDERS_KEY,[]);
+    lsSet(ORDERS_KEY,[newOrder,...globalOrders].slice(0,50));
+    if(user&&!user.isAdmin){
+      const userOrder={id:orderId,date:dateStr,items:newOrder.items,total,status:"✅"};
+      addOrderToUser(userOrder);
+      const couriers=lsGet(COURIERS_KEY,INIT_COURIERS);
+      if(couriers.length>0){
+        const idx=Math.floor(Math.random()*Math.min(2,couriers.length));
+        couriers[idx]={...couriers[idx],del:couriers[idx].del+1,earn:couriers[idx].earn+Math.round(total*0.08)};
+        lsSet(COURIERS_KEY,couriers);
+      }
+    }
+    setCart({});lsSet("ffg_cart",{});
+    nav("tracking");
+  };
+
+  return <div style={{minHeight:"100vh",background:T.bg,color:T.text}}>
+    <nav style={{position:"sticky",top:0,zIndex:100,background:T.nav,backdropFilter:"blur(20px)",borderBottom:`1px solid ${T.border}`,padding:"0 1rem"}}>
+      <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",height:56,gap:10}}>
+        <Btn v="ghost" onClick={()=>nav("home")}>{L.back}</Btn>
+        <h2 style={{margin:0,fontSize:17,fontWeight:800,fontFamily:ff}}>🛒 {L.cart}</h2>
+      </div>
+    </nav>
+    <div style={{maxWidth:860,margin:"0 auto",padding:"1.25rem 1rem 3rem"}} className="fade-in">
+      {items.length===0?<Crd style={{textAlign:"center",padding:"3rem 2rem",marginTop:"2rem"}}>
+        <div style={{fontSize:52}}>🛒</div>
+        <h3 style={{fontFamily:ff,margin:"1rem 0",color:T.text}}>{L.emptyCart}</h3>
+        <Btn onClick={()=>nav("home")}>{L.goMenu}</Btn>
+      </Crd>:<div style={{display:"grid",gap:"1.1rem"}}>
+        <div style={{display:"grid",gap:"0.55rem"}}>
+          {items.map(item=><Crd key={item.id} style={{display:"flex",alignItems:"center",gap:"0.75rem",padding:0,overflow:"hidden"}}>
+            <div style={{width:68,height:68,flexShrink:0,position:"relative"}}>
+              {item.img?<img src={item.img} alt={item.name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}
+                onError={e=>{e.target.style.display="none";}}/>
+              :<div style={{width:"100%",height:"100%",background:T.cardHover,display:"flex",alignItems:"center",justifyContent:"center",fontSize:26}}>🍽️</div>}
+            </div>
+            <div style={{flex:1,padding:"0.55rem 0",minWidth:0}}>
+              <div style={{fontWeight:700,fontSize:14,color:T.text}}>{item.name}</div>
+              <div style={{color:T.accent,fontWeight:700,marginTop:2,fontSize:13}}>{(item.price*item.qty).toLocaleString()}₸</div>
+              <div style={{fontSize:11,color:T.muted}}>{item.price.toLocaleString()}₸ × {item.qty}</div>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:6,padding:"0 0.8rem",flexShrink:0}}>
+              <button onClick={()=>updQ(item.id,-1)} style={{width:28,height:28,borderRadius:7,background:T.cardHover,border:`1px solid ${T.border}`,color:T.text,cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
+              <span style={{fontWeight:700,minWidth:18,textAlign:"center",color:T.text,fontSize:14}}>{item.qty}</span>
+              <button onClick={()=>updQ(item.id,1)} style={{width:28,height:28,borderRadius:7,background:T.accent,border:"none",color:"#fff",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+            </div>
+          </Crd>)}
+        </div>
+
+        {del>0&&<div style={{background:T.glow,border:`1px solid ${T.accent}44`,borderRadius:11,padding:"9px 13px",fontSize:13,color:T.accent}}>
+          💡 {L.freeHint}
+        </div>}
+
+        {/* Address with map */}
+        <Crd>
+          <h4 style={{fontWeight:700,marginBottom:"0.6rem",fontFamily:ff,color:T.text}}>📍 {L.address}</h4>
+          <p style={{fontSize:12,color:T.muted,marginBottom:"0.6rem"}}>{L.mapHint}</p>
+          <Btn v="ghost" full sz="sm" onClick={()=>setShowMap(s=>!s)} style={{marginBottom:"0.7rem"}}>
+            🗺️ {showMap?"Картаны жабу":"Картадан таңдау"}
+          </Btn>
+          {showMap&&<div style={{marginBottom:"0.75rem"}}>
+            <DeliveryMap selectedPin={selectedPin} onSelectPin={selectMapPin}/>
+            <div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:"0.5rem"}}>
+              {ALMATY_PINS.map((p,i)=><button key={i} onClick={()=>selectMapPin(i)} style={{
+                background:selectedPin===i?T.accent+"22":"transparent",
+                border:`1px solid ${selectedPin===i?T.accent:T.border}`,
+                borderRadius:8,padding:"5px 9px",fontSize:11,color:selectedPin===i?T.accent:T.muted,cursor:"pointer"
+              }}>{p.name}</button>)}
+            </div>
+          </div>}
+          <Inp value={addr} onChange={e=>sAddr(e.target.value)} placeholder={L.addrPlaceholder}/>
+          {user&&!user.isAdmin&&user.addresses&&user.addresses.length>0&&<div style={{marginTop:"0.5rem",display:"flex",flexWrap:"wrap",gap:6}}>
+            {user.addresses.map((a,i)=><button key={i} onClick={()=>sAddr(a)} style={{background:addr===a?T.accent+"22":"transparent",border:`1px solid ${addr===a?T.accent:T.border}`,borderRadius:8,padding:"5px 10px",fontSize:12,color:addr===a?T.accent:T.muted,cursor:"pointer"}}>{a}</button>)}
+          </div>}
+        </Crd>
+
+        <Crd>
+          <h4 style={{fontWeight:700,marginBottom:"0.6rem",fontFamily:ff,color:T.text}}>💳 {L.payment}</h4>
+          {[["card","💳 Банковская карта"],["cash","💵 Наличные"],["kaspi","🟠 Kaspi Pay"]].map(([k,lbl])=>
+            <label key={k} style={{display:"flex",alignItems:"center",gap:9,padding:"8px 0",cursor:"pointer"}}>
+              <input type="radio" checked={pay===k} onChange={()=>sPay(k)} style={{accentColor:T.accent,width:15,height:15}}/><span style={{fontSize:14,color:T.text}}>{lbl}</span>
+            </label>
+          )}
+        </Crd>
+
+        <Crd>
+          <h3 style={{marginBottom:"1rem",fontWeight:800,fontFamily:ff,color:T.text}}>{L.total}</h3>
+          <div style={{display:"grid",gap:7,marginBottom:"1rem"}}>
+            {[[L.subtotal,sub],[L.delivery,del],promoOk?[`${L.discount} (FIRST20)`,-disc]:null].filter(Boolean).map(([k,v])=>
+              <div key={k} style={{display:"flex",justifyContent:"space-between",fontSize:14}}>
+                <span style={{color:T.muted}}>{k}</span>
+                <span style={{color:v<0?T.green:T.text,fontWeight:v<0?700:400}}>{v<0?"−":""}{Math.abs(v).toLocaleString()}₸</span>
+              </div>
+            )}
+            <div style={{borderTop:`1px solid ${T.border}`,paddingTop:9,display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:17}}>
+              <span style={{color:T.text}}>{L.total}</span><span style={{color:T.accent}}>{total.toLocaleString()}₸</span>
+            </div>
+          </div>
+          {!promoOk&&<div style={{display:"flex",gap:7,marginBottom:"0.65rem"}}>
+            <Inp value={promo} onChange={e=>sPromo(e.target.value)} placeholder={L.promo} style={{flex:1}}
+              onKeyDown={e=>{if(e.key==="Enter"){if(promo.toUpperCase()==="FIRST20")sPOk(true);else alert(L.promoErr);}}}/>
+            <Btn v="ghost" onClick={()=>{if(promo.toUpperCase()==="FIRST20")sPOk(true);else alert(L.promoErr);}}>{L.apply}</Btn>
+          </div>}
+          {promoOk&&<div style={{color:T.green,fontSize:13,marginBottom:"0.65rem",padding:"8px 11px",background:T.green+"11",borderRadius:8}}>{L.promoOk}</div>}
+          {err&&<div style={{color:T.red,fontSize:13,marginBottom:"0.65rem",padding:"8px 11px",background:T.red+"11",borderRadius:8}}>{err}</div>}
+          <Btn full sz="lg" onClick={doCheckout}>{L.checkout} — {total.toLocaleString()}₸</Btn>
+          <div style={{textAlign:"center",fontSize:12,color:T.muted,marginTop:8}}>{L.secure}</div>
+        </Crd>
+      </div>}
+    </div>
+  </div>;
+}
+
+/* ══ TRACKING ══ */
+function TrackingPage({nav}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const[idx,sIdx]=useState(0),[eta,sEta]=useState(28),[showChat,sSC]=useState(false),
+        [chatMsg,sCM]=useState(""),
+        [chatH,sCH]=useState([{from:"courier",text:"Саламатсызба! Тапсырысыңызды алдым 🛵"}]);
+  const ff="'Syne',sans-serif";
+  const ols=[L.os0,L.os1,L.os2,L.os3,L.os4];
+  const ois=[L.oi0,L.oi1,L.oi2,L.oi3,L.oi4];
+  const statKeys=["placed","preparing","ready","pickup","arrived"];
+  useEffect(()=>{
+    const ti=setInterval(()=>sEta(e=>Math.max(0,e-.5)),1000);
+    const t1=setTimeout(()=>sIdx(1),4000),t2=setTimeout(()=>sIdx(2),9000),
+          t3=setTimeout(()=>sIdx(3),16000),t4=setTimeout(()=>sIdx(4),26000);
+    return()=>{clearInterval(ti);[t1,t2,t3,t4].forEach(clearTimeout);};
+  },[]);
+  const oNum=useRef(Math.floor(Math.random()*9000)+1000);
+  const sendMsg=()=>{
+    if(!chatMsg.trim())return;
+    sCH(h=>[...h,{from:"user",text:chatMsg}]);sCM("");
+    setTimeout(()=>sCH(h=>[...h,{from:"courier",text:"Жақсы! 👍"}]),1100);
+  };
+  return <div style={{minHeight:"100vh",background:T.bg,color:T.text}}>
+    <nav style={{position:"sticky",top:0,zIndex:100,background:T.nav,backdropFilter:"blur(20px)",borderBottom:`1px solid ${T.border}`,padding:"0 1rem"}}>
+      <div style={{maxWidth:860,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56}}>
+        <Btn v="ghost" onClick={()=>nav("home")}>← {L.home}</Btn>
+        <span style={{fontWeight:800,fontSize:15,fontFamily:ff}}>📦 {L.trackOrder}</span>
+        <span style={{color:T.muted,fontSize:12}}>FF-{oNum.current}</span>
+      </div>
+    </nav>
+    <div style={{maxWidth:860,margin:"0 auto",padding:"1.25rem 1rem 3rem"}} className="fade-in">
+      <Crd style={{textAlign:"center",marginBottom:"1rem",background:idx===4?T.green+"11":T.card,borderColor:idx===4?T.green:T.border}}>
+        <div style={{fontSize:44,marginBottom:"0.4rem"}}>{ois[idx]}</div>
+        <h2 style={{fontSize:20,fontWeight:900,fontFamily:ff,margin:"0 0 0.4rem",color:T.text}}>{ols[idx]}</h2>
+        {idx<4&&<div style={{fontSize:32,fontWeight:900,color:T.accent,fontFamily:ff}}>{Math.ceil(eta)} {L.min}<div style={{fontSize:12,fontWeight:400,color:T.muted,marginTop:3}}>{L.etaLabel}</div></div>}
+      </Crd>
+      <Crd style={{padding:0,overflow:"hidden",marginBottom:"1rem"}}>
+        <div style={{padding:"0.8rem 1rem 0.4rem",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontWeight:700,fontFamily:ff,color:T.text}}>🗺️ {L.liveMap}</span>
+          <span style={{fontSize:12,color:T.green}}>● Live</span>
+        </div>
+        <CourierMap status={statKeys[idx]}/>
+        <div style={{padding:"0.55rem 1rem",borderTop:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",fontSize:13,flexWrap:"wrap",gap:4}}>
+          <span style={{color:T.muted}}>🛵 {L.courierName}</span>
+          <span style={{color:T.accent}}>★ 4.9 · 347</span>
+        </div>
+      </Crd>
+      <Crd style={{marginBottom:"1rem"}}>
+        <h4 style={{fontWeight:700,marginBottom:"0.65rem",fontFamily:ff,color:T.text}}>📞 Байланыс</h4>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <Btn v="green" onClick={()=>alert("📞 +7 777 123 45 67")} style={{flex:1}}>{L.callC}</Btn>
+          <Btn onClick={()=>sSC(s=>!s)} style={{flex:1}}>{L.chatC}</Btn>
+        </div>
+        {showChat&&<div style={{marginTop:"0.75rem"}}>
+          <div style={{background:T.cardHover,borderRadius:11,padding:"0.65rem",maxHeight:160,overflowY:"auto",marginBottom:"0.55rem",display:"flex",flexDirection:"column",gap:7}}>
+            {chatH.map((m,i)=><div key={i} style={{display:"flex",justifyContent:m.from==="user"?"flex-end":"flex-start"}}>
+              <div style={{background:m.from==="user"?T.accent:T.card,color:m.from==="user"?"#fff":T.text,borderRadius:9,padding:"6px 11px",fontSize:13,maxWidth:"75%"}}>{m.text}</div>
+            </div>)}
+          </div>
+          <div style={{display:"flex",gap:7}}>
+            <Inp value={chatMsg} onChange={e=>sCM(e.target.value)} placeholder="Хабарлама..." style={{flex:1}} onKeyDown={e=>e.key==="Enter"&&sendMsg()}/>
+            <Btn onClick={sendMsg}>{L.sendMsg}</Btn>
+          </div>
+        </div>}
+      </Crd>
+      <Crd>
+        <h3 style={{marginBottom:"1rem",fontWeight:800,fontFamily:ff,color:T.text}}>📋 {L.trackOrder}</h3>
+        {ols.map((s,i)=>(
+          <div key={i} style={{display:"flex",gap:"0.65rem",marginBottom:i<ols.length-1?"0.9rem":0}}>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:33}}>
+              <div style={{width:33,height:33,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,border:`2px solid ${i<=idx?T.accent:T.border}`,background:i<=idx?T.accent+"22":"transparent",transition:"all 0.4s",flexShrink:0}}>{i<idx?"✓":ois[i]}</div>
+              {i<ols.length-1&&<div style={{width:2,flex:1,minHeight:14,background:i<idx?T.accent:T.border,margin:"3px 0",transition:"background 0.4s"}}/>}
+            </div>
+            <div style={{flex:1,paddingTop:6}}>
+              <div style={{fontWeight:i===idx?700:400,color:i<=idx?T.text:T.muted,fontSize:14}}>{s}</div>
+            </div>
+            {i<idx&&<div style={{color:T.green,fontSize:12,paddingTop:7}}>✅</div>}
+          </div>
+        ))}
+      </Crd>
+    </div>
+  </div>;
+}
+
+/* ══ ACCOUNT ══ */
+function AccountPage({nav,user,updateUser,doLogout,restaurants}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const[tab,sTab]=useState("profile");
+  const[name,sName]=useState(user?.name||"");
+  const[phone,sPhone]=useState(user?.phone||"");
+  const[newAddr,sNewAddr]=useState("");
+  const[editIdx,sEditIdx]=useState(-1);
+  const[editVal,sEditVal]=useState("");
+  const[saved,sSaved]=useState(false);
+  const ff="'Syne',sans-serif";
+
+  useEffect(()=>{if(user){sName(user.name||"");sPhone(user.phone||"");}},[user]);
+
+  if(!user)return <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center"}}>
+    <Crd style={{textAlign:"center",padding:"2rem",maxWidth:320}}>
+      <div style={{fontSize:44,marginBottom:"0.8rem"}}>🔒</div>
+      <h3 style={{color:T.text,fontFamily:ff,marginBottom:"0.8rem"}}>{L.login}</h3>
+      <Btn full onClick={()=>nav("login")}>{L.loginBtn}</Btn>
+    </Crd>
+  </div>;
+
+  const saveProfile=()=>{updateUser({...user,name,phone});sSaved(true);setTimeout(()=>sSaved(false),2000);};
+  const addAddr=()=>{if(!newAddr.trim())return;updateUser({...user,addresses:[...(user.addresses||[]),newAddr.trim()]});sNewAddr("");};
+  const delAddr=i=>{const a=[...(user.addresses||[])];a.splice(i,1);updateUser({...user,addresses:a});};
+  const startEdit=(i,v)=>{sEditIdx(i);sEditVal(v);};
+  const saveEdit=()=>{if(!editVal.trim())return;const a=[...(user.addresses||[])];a[editIdx]=editVal.trim();updateUser({...user,addresses:a});sEditIdx(-1);sEditVal("");};
+  const toggleFav=rId=>{const favs=user.favorites||[];const next=favs.includes(rId)?favs.filter(f=>f!==rId):[...favs,rId];updateUser({...user,favorites:next});};
+  const favRestaurants=restaurants.filter(r=>(user.favorites||[]).includes(r.id));
+
+  const tabs=[["profile",`👤 ${L.myProfile}`],["orders",`📦 ${L.myOrders}`],["addresses",`📍 ${L.myAddr}`],["favorites",`❤️ ${L.myFav}${(user.favorites||[]).length>0?` (${(user.favorites||[]).length})`:""}`]];
+
+  return <div style={{minHeight:"100vh",background:T.bg,color:T.text}}>
+    <nav style={{position:"sticky",top:0,zIndex:100,background:T.nav,backdropFilter:"blur(20px)",borderBottom:`1px solid ${T.border}`,padding:"0 1rem"}}>
+      <div style={{maxWidth:860,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56,gap:10}}>
+        <Btn v="ghost" onClick={()=>nav("home")}>{L.back}</Btn>
+        <h2 style={{margin:0,fontSize:17,fontWeight:800,fontFamily:ff}}>👤 {L.myProfile}</h2>
+        <Btn v="danger" sz="sm" onClick={doLogout}>↩ {L.logout}</Btn>
+      </div>
+    </nav>
+    <div style={{maxWidth:860,margin:"0 auto",padding:"1.25rem 1rem 3rem"}} className="fade-in">
+      <div style={{display:"flex",gap:"0.4rem",marginBottom:"1.1rem",flexWrap:"wrap"}}>
+        {tabs.map(([k,lbl])=><button key={k} onClick={()=>sTab(k)} style={{background:tab===k?T.accent:T.card,color:tab===k?"#fff":T.muted,border:`1px solid ${tab===k?T.accent:T.border}`,borderRadius:9,padding:"7px 13px",fontSize:13,fontWeight:600,cursor:"pointer",outline:"none",whiteSpace:"nowrap",transition:"all 0.18s"}}>{lbl}</button>)}
+      </div>
+      {tab==="profile"&&<Crd>
+        <div style={{display:"flex",alignItems:"center",gap:"1rem",marginBottom:"1.25rem",flexWrap:"wrap"}}>
+          <div style={{width:54,height:54,borderRadius:"50%",background:T.accent+"33",border:`2px solid ${T.accent}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>👤</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontWeight:800,fontSize:17,fontFamily:ff,color:T.text}}>{user.name}</div>
+            <div style={{color:T.muted,fontSize:13}}>{user.phone||user.email}</div>
+          </div>
+          <Bdg color={T.green}>⭐ Premium</Bdg>
+        </div>
+        <div style={{display:"grid",gap:"0.6rem"}}>
+          <Inp value={name} onChange={e=>sName(e.target.value)} placeholder={L.name}/>
+          <Inp value={phone} onChange={e=>sPhone(e.target.value)} placeholder={L.phone}/>
+          <Inp value={user.email} onChange={()=>{}} placeholder={L.email}/>
+          {saved&&<div style={{color:T.green,fontSize:13,padding:"8px 11px",background:T.green+"11",borderRadius:8}}>✅ Сақталды!</div>}
+          <Btn full onClick={saveProfile}>{L.saveBtn}</Btn>
+        </div>
+      </Crd>}
+      {tab==="orders"&&<div style={{display:"grid",gap:"0.6rem"}}>
+        {(!user.orders||user.orders.length===0)
+          ?<Crd style={{textAlign:"center",padding:"2rem"}}><div style={{fontSize:40,marginBottom:"0.7rem"}}>📦</div><p style={{color:T.muted}}>{L.noOrders}</p></Crd>
+          :user.orders.map((o,i)=><Crd key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:8}}>
+            <div>
+              <div style={{fontWeight:700,marginBottom:3,fontFamily:ff,color:T.text}}>{o.id}</div>
+              <div style={{color:T.muted,fontSize:13}}>{o.items}</div>
+              <div style={{color:T.sub,fontSize:12}}>{o.date}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontWeight:800,color:T.accent}}>{o.total.toLocaleString()}₸</div>
+              <Bdg color={T.green}>{o.status}</Bdg>
+            </div>
+          </Crd>)
+        }
+      </div>}
+      {tab==="addresses"&&<div style={{display:"grid",gap:"0.6rem"}}>
+        {(user.addresses||[]).length===0&&<Crd style={{textAlign:"center",padding:"1.5rem"}}><p style={{color:T.muted}}>Мекенжай жоқ</p></Crd>}
+        {(user.addresses||[]).map((a,i)=><Crd key={i} style={{padding:"0.9rem"}}>
+          {editIdx===i
+            ?<div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+              <Inp value={editVal} onChange={e=>sEditVal(e.target.value)} style={{flex:1}} onKeyDown={e=>e.key==="Enter"&&saveEdit()}/>
+              <Btn onClick={saveEdit}>{L.saveBtn}</Btn>
+              <Btn v="ghost" onClick={()=>sEditIdx(-1)}>{L.cancelR}</Btn>
+            </div>
+            :<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+              <div style={{color:T.text,fontSize:14,flex:1}}>📍 {a}</div>
+              <div style={{display:"flex",gap:6,flexShrink:0}}>
+                <Btn sz="sm" v="ghost" onClick={()=>startEdit(i,a)}>{L.editAddr}</Btn>
+                <Btn sz="sm" v="danger" onClick={()=>delAddr(i)}>{L.delAddr}</Btn>
+              </div>
+            </div>}
+        </Crd>)}
+        <div style={{display:"flex",gap:7}}>
+          <Inp value={newAddr} onChange={e=>sNewAddr(e.target.value)} placeholder={L.addrPlaceholder} style={{flex:1}} onKeyDown={e=>e.key==="Enter"&&addAddr()}/>
+          <Btn onClick={addAddr}>{L.addAddr}</Btn>
+        </div>
+      </div>}
+      {tab==="favorites"&&<div>
+        {favRestaurants.length===0
+          ?<Crd style={{textAlign:"center",padding:"2.5rem"}}>
+            <div style={{fontSize:48,marginBottom:"0.8rem"}}>🤍</div>
+            <h3 style={{color:T.text,fontFamily:ff,marginBottom:"0.5rem"}}>{L.noFav}</h3>
+            <p style={{color:T.muted,fontSize:13}}>Мейрамхана бетінде ❤️ батырмасын басыңыз</p>
+            <div style={{marginTop:"1rem"}}><Btn onClick={()=>nav("home")}>← Мейрамханаларға өту</Btn></div>
+          </Crd>
+          :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:"0.9rem"}}>
+            {favRestaurants.map(r=>(
+              <Crd key={r.id} style={{overflow:"hidden",padding:0}}>
+                <div style={{height:120,position:"relative",overflow:"hidden"}}>
+                  <img src={r.img} alt={r.name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}
+                    onError={e=>{e.target.src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80";}}/>
+                  <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(0,0,0,0.45),transparent 55%)"}}/>
+                  <button onClick={()=>toggleFav(r.id)} style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.5)",border:"none",borderRadius:7,padding:"4px 8px",fontSize:16,cursor:"pointer",color:"#fff"}}>❤️</button>
+                  <div style={{position:"absolute",bottom:7,left:9,fontSize:20}}>{r.emoji}</div>
+                </div>
+                <div style={{padding:"0.75rem"}}>
+                  <div style={{fontWeight:800,fontSize:14,fontFamily:ff,color:T.text,marginBottom:3}}>{r.name}</div>
+                  <div style={{display:"flex",gap:8,fontSize:12,color:T.muted,marginBottom:8}}>
+                    <span>★ {r.rating}</span><span>⏱ {r.time} мин</span>
+                  </div>
+                  <Btn full sz="sm" onClick={()=>nav("restaurant",r)}>Менюді ашу →</Btn>
+                </div>
+              </Crd>
+            ))}
+          </div>
+        }
+      </div>}
+    </div>
+  </div>;
+}
+
+/* ══ ADMIN ══ */
+function AdminPage({nav,user,restaurants,setRestaurants,doLogout}){
+  const{dark,L}=useApp();const T=getT(dark);
+  const ff="'Syne',sans-serif";
+
+  if(!user?.isAdmin)return <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center"}}>
+    <Crd style={{textAlign:"center",padding:"2rem",maxWidth:320}}>
+      <div style={{fontSize:44,marginBottom:"0.8rem"}}>🔒</div>
+      <h3 style={{color:T.text,fontFamily:ff,marginBottom:"0.8rem"}}>Рұқсат жоқ</h3>
+      <Btn full onClick={()=>nav("admin-login")}>Әкімші ретінде кіру</Btn>
+    </Crd>
+  </div>;
+
+  const[tab,sTab]=useState("dashboard");
+  const[showModal,sShowModal]=useState(false);
+  const[editRest,sEditRest]=useState(null);
+  const[rForm,sRForm]=useState({name:"",cat:"burgers",img:"",time:"20-30",emoji:"🍽️",free:true,fee:0,rating:4.5,tags:[]});
+  const[formErr,sFormErr]=useState("");
+
+  const[liveOrders,setLiveOrders]=useState(()=>lsGet(ORDERS_KEY,[]));
+  useEffect(()=>{const interval=setInterval(()=>setLiveOrders(lsGet(ORDERS_KEY,[])),3000);return()=>clearInterval(interval);},[]);
+
+  const[liveCouriers,setLiveCouriers]=useState(()=>lsGet(COURIERS_KEY,INIT_COURIERS));
+  useEffect(()=>{const interval=setInterval(()=>setLiveCouriers(lsGet(COURIERS_KEY,INIT_COURIERS)),3000);return()=>clearInterval(interval);},[]);
+
+  const totalRevenue=liveOrders.reduce((a,o)=>a+(o.total||0),0);
+  const onlineCouriers=liveCouriers.filter(c=>c.status==="🟢").length;
+
+  const openAdd=()=>{sEditRest(null);sRForm({name:"",cat:"burgers",img:"",time:"20-30",emoji:"🍽️",free:true,fee:0,rating:4.5,tags:[]});sFormErr("");sShowModal(true);};
+  const openEdit=r=>{sEditRest(r);sRForm({name:r.name||"",cat:r.cat||"burgers",img:r.img||"",time:r.time||"20-30",emoji:r.emoji||"🍽️",free:r.free!==false,fee:r.fee||0,rating:r.rating||4.5,tags:r.tags||[]});sFormErr("");sShowModal(true);};
+  const saveRest=()=>{
+    sFormErr("");
+    if(!rForm.name.trim()){sFormErr("Мейрамхана атауын енгізіңіз");return;}
+    if(editRest)setRestaurants(restaurants.map(r=>r.id===editRest.id?{...r,...rForm}:r));
+    else setRestaurants([...restaurants,{id:Date.now(),cnt:0,disc:null,...rForm,img:rForm.img.trim()||"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80"}]);
+    sShowModal(false);
+  };
+  const delRest=id=>{if(window.confirm("Жоюды растайсыз ба?"))setRestaurants(restaurants.filter(r=>r.id!==id));};
+
+  const tabs=[["dashboard",`📊 ${L.dashboard}`],["orders",`📦 ${L.ordersT}${liveOrders.length>0?` (${liveOrders.length})`:""}`],["restaurants",`🍽️ ${L.restaurantsT}`],["couriers",`🛵 ${L.couriers}`]];
+
+  return <div style={{minHeight:"100vh",background:T.bg,color:T.text}}>
+    {showModal&&<Modal title={editRest?"✏️ Мейрамхана өзгерту":L.addRest} onClose={()=>sShowModal(false)}>
+      <div style={{display:"grid",gap:"0.65rem"}}>
+        <div><div style={{fontSize:12,color:T.muted,marginBottom:4}}>{L.restName} *</div>
+          <Inp placeholder={L.restName} value={rForm.name} onChange={e=>sRForm(f=>({...f,name:e.target.value}))}/></div>
+        <div><div style={{fontSize:12,color:T.muted,marginBottom:4}}>{L.restCat}</div>
+          <Sel value={rForm.cat} onChange={e=>sRForm(f=>({...f,cat:e.target.value}))}>
+            {CATS.filter(c=>c!=="all").map(c=><option key={c} value={c}>{L[CAT_KEYS[c]]}</option>)}
+          </Sel></div>
+        <div><div style={{fontSize:12,color:T.muted,marginBottom:4}}>{L.restImg}</div>
+          <Inp placeholder="https://..." value={rForm.img} onChange={e=>sRForm(f=>({...f,img:e.target.value}))}/></div>
+        <div><div style={{fontSize:12,color:T.muted,marginBottom:4}}>{L.restTime}</div>
+          <Inp placeholder="20-30" value={rForm.time} onChange={e=>sRForm(f=>({...f,time:e.target.value}))}/></div>
+        <div><div style={{fontSize:12,color:T.muted,marginBottom:4}}>Emoji</div>
+          <Inp placeholder="🍕" value={rForm.emoji} onChange={e=>sRForm(f=>({...f,emoji:e.target.value}))}/></div>
+        <div style={{display:"flex",gap:12,alignItems:"center"}}>
+          <label style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer"}}>
+            <input type="checkbox" checked={rForm.free} onChange={e=>sRForm(f=>({...f,free:e.target.checked}))} style={{accentColor:T.accent,width:15,height:15}}/>
+            <span style={{fontSize:14,color:T.text}}>Тегін жеткізу</span>
+          </label>
+          {!rForm.free&&<div style={{display:"flex",alignItems:"center",gap:7}}>
+            <span style={{fontSize:13,color:T.muted}}>Баға:</span>
+            <input type="number" value={rForm.fee} onChange={e=>sRForm(f=>({...f,fee:Number(e.target.value)}))}
+              style={{width:80,background:T.inp,border:`1px solid ${T.border}`,borderRadius:8,padding:"7px 10px",fontSize:13,color:T.text,outline:"none"}}/>
+            <span style={{fontSize:13,color:T.muted}}>₸</span>
+          </div>}
+        </div>
+        {formErr&&<div style={{color:T.red,fontSize:13,padding:"8px 11px",background:T.red+"11",borderRadius:8}}>{formErr}</div>}
+        <div style={{display:"flex",gap:8,marginTop:"0.5rem"}}>
+          <Btn full onClick={saveRest}>{L.saveRest}</Btn>
+          <Btn v="ghost" full onClick={()=>sShowModal(false)}>{L.cancelR}</Btn>
+        </div>
+      </div>
+    </Modal>}
+
+    <nav style={{position:"sticky",top:0,zIndex:100,background:T.nav,backdropFilter:"blur(20px)",borderBottom:`1px solid ${T.border}`,padding:"0 1rem"}}>
+      <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:56,flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <Btn v="ghost" sz="sm" onClick={()=>nav("home")}>← {L.home}</Btn>
+          <span style={{fontSize:15,fontWeight:800,fontFamily:ff}}>⚙️ {L.adminPanel}</span>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <span style={{fontSize:11,color:T.green}}>● Live</span>
+          <Bdg color={T.green}>Admin v2.0</Bdg>
+          <Btn v="danger" sz="sm" onClick={doLogout}>↩ {L.logout}</Btn>
+        </div>
+      </div>
+    </nav>
+
+    <div style={{maxWidth:1200,margin:"0 auto",padding:"1.25rem 1rem 3rem"}} className="fade-in">
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:"0.7rem",marginBottom:"1.25rem"}}>
+        {[
+          ["📦 "+L.orders,String(liveOrders.length),`+${liveOrders.length}`,T.accent],
+          ["💰 Табыс",`${totalRevenue.toLocaleString()}₸`,"+8%",T.green],
+          ["🛵 "+L.couriers,String(liveCouriers.length),"Барлығы",T.blue],
+          ["🟢 Онлайн",String(onlineCouriers),"Жұмыста",T.green]
+        ].map(([lbl,v,c,col])=>
+          <Crd key={lbl} style={{padding:"0.8rem"}}>
+            <div style={{fontSize:19,fontWeight:900,color:col,marginBottom:2,fontFamily:ff}}>{v}</div>
+            <div style={{color:T.muted,fontSize:12}}>{lbl}</div>
+            <div style={{fontSize:11,color:T.sub,marginTop:2}}>{c}</div>
+          </Crd>
+        )}
+      </div>
+
+      <div style={{display:"flex",gap:"0.4rem",marginBottom:"1.1rem",flexWrap:"wrap"}}>
+        {tabs.map(([k,lbl])=><button key={k} onClick={()=>sTab(k)} style={{background:tab===k?T.accent:T.card,color:tab===k?"#fff":T.muted,border:`1px solid ${tab===k?T.accent:T.border}`,borderRadius:9,padding:"7px 13px",fontSize:13,fontWeight:600,cursor:"pointer",outline:"none",whiteSpace:"nowrap",transition:"all 0.18s"}}>{lbl}</button>)}
+      </div>
+
+      {tab==="dashboard"&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(270px,1fr))",gap:"1.1rem"}}>
+        <Crd>
+          <h4 style={{fontWeight:700,marginBottom:"0.65rem",fontFamily:ff,color:T.text}}>📈 {L.salesChart}</h4>
+          <div style={{display:"flex",alignItems:"flex-end",gap:4,height:85}}>
+            {[30,45,62,80,95,110,85,70,90,122,100,72].map((h,i)=><div key={i} style={{flex:1,height:`${h/1.22}%`,background:i===9?T.accent:T.accent+"44",borderRadius:3}}/>)}
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:T.sub,marginTop:4}}>
+            <span>9:00</span><span>12:00</span><span>15:00</span><span>18:00</span><span>21:00</span>
+          </div>
+        </Crd>
+        <Crd>
+          <h4 style={{fontWeight:700,marginBottom:"0.65rem",fontFamily:ff,color:T.text}}>🍽️ {L.topRest}</h4>
+          {restaurants.slice(0,5).map((r,i)=><div key={r.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:9}}>
+            <span style={{fontSize:14,minWidth:20}}>{["🥇","🥈","🥉","4️⃣","5️⃣"][i]}</span>
+            <span style={{flex:1,fontSize:13,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.name}</span>
+            <div style={{height:5,width:70,background:T.border,borderRadius:3,overflow:"hidden",flexShrink:0}}>
+              <div style={{height:"100%",width:`${100-i*18}%`,background:T.accent,borderRadius:3}}/>
+            </div>
+          </div>)}
+        </Crd>
+        {liveOrders.length>0&&<Crd>
+          <h4 style={{fontWeight:700,marginBottom:"0.65rem",fontFamily:ff,color:T.text}}>🆕 Жаңа тапсырыстар</h4>
+          {liveOrders.slice(0,4).map((o,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${T.border}`,fontSize:13}}>
+            <div>
+              <div style={{fontWeight:600,color:T.accent}}>{o.id}</div>
+              <div style={{color:T.muted,fontSize:11}}>{o.client} · {o.restaurant}</div>
+            </div>
+            <div style={{color:T.text,fontWeight:700}}>{(o.total||0).toLocaleString()}₸</div>
+          </div>)}
+        </Crd>}
+      </div>}
+
+      {tab==="orders"&&<Crd>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"0.9rem",flexWrap:"wrap",gap:8}}>
+          <h3 style={{fontWeight:800,fontFamily:ff,color:T.text}}>{L.latestOrders}</h3>
+          <div style={{display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontSize:12,color:T.green}}>● Автожаңарту</span>
+            <Bdg color={T.accent}>{liveOrders.length} тапсырыс</Bdg>
+          </div>
+        </div>
+        {liveOrders.length===0
+          ?<div style={{textAlign:"center",padding:"3rem",color:T.muted}}>
+            <div style={{fontSize:44,marginBottom:"0.7rem"}}>📋</div>
+            <p>Тапсырыстар жоқ. Клиент тапсырыс берген кезде мұнда көрсетіледі.</p>
+          </div>
+          :<div style={{overflowX:"auto"}}>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:13,minWidth:500}}>
+              <thead><tr style={{borderBottom:`1px solid ${T.border}`}}>
+                {["ID","Клиент","Мейрамхана","Тауарлар","Сома","Уақыт"].map(h=><th key={h} style={{padding:"8px 10px",color:T.muted,textAlign:"left",fontWeight:600,whiteSpace:"nowrap"}}>{h}</th>)}
+              </tr></thead>
+              <tbody>
+                {liveOrders.map((o,ri)=><tr key={ri} style={{borderBottom:`1px solid ${T.border}`}}>
+                  <td style={{padding:"9px 10px",color:T.accent,whiteSpace:"nowrap",fontWeight:700}}>{o.id}</td>
+                  <td style={{padding:"9px 10px",color:T.text,whiteSpace:"nowrap"}}>{o.client}</td>
+                  <td style={{padding:"9px 10px",color:T.text,whiteSpace:"nowrap"}}>{o.restaurant}</td>
+                  <td style={{padding:"9px 10px",color:T.muted,maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{o.items}</td>
+                  <td style={{padding:"9px 10px",color:T.text,fontWeight:700,whiteSpace:"nowrap"}}>{(o.total||0).toLocaleString()}₸</td>
+                  <td style={{padding:"9px 10px",color:T.muted,whiteSpace:"nowrap"}}>{o.time}</td>
+                </tr>)}
+              </tbody>
+            </table>
+          </div>
+        }
+      </Crd>}
+
+      {tab==="restaurants"&&<div style={{display:"grid",gap:"0.6rem"}}>
+        <Btn full onClick={openAdd}>{L.addRest}</Btn>
+        {restaurants.map(r=><Crd key={r.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:9,padding:"0.85rem"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:50,height:50,borderRadius:10,overflow:"hidden",flexShrink:0,background:T.cardHover,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>
+              {r.img?<img src={r.img} alt={r.name} style={{width:"100%",height:"100%",objectFit:"cover"}} onError={e=>{e.target.style.display="none";}}/>
+              :<span>{r.emoji||"🍽️"}</span>}
+            </div>
+            <div>
+              <div style={{fontWeight:700,fontFamily:ff,color:T.text,fontSize:14}}>{r.emoji} {r.name}</div>
+              <div style={{color:T.muted,fontSize:12}}>★ {r.rating} · {L[CAT_KEYS[r.cat]]} · {r.time} {L.min}</div>
+              <div style={{color:T.muted,fontSize:12}}>🚚 {r.free?"Тегін":`${r.fee}₸`}</div>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:7}}>
+            <Btn v="ghost" sz="sm" onClick={()=>openEdit(r)}>{L.editR}</Btn>
+            <Btn v="danger" sz="sm" onClick={()=>delRest(r.id)}>{L.delR}</Btn>
+          </div>
+        </Crd>)}
+      </div>}
+
+      {tab==="couriers"&&<div style={{display:"grid",gap:"0.6rem"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+          <span style={{fontSize:12,color:T.green}}>● 3 секунд сайын жаңарады</span>
+        </div>
+        {liveCouriers.map((c,i)=><Crd key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:9,padding:"0.85rem"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:42,height:42,borderRadius:"50%",background:T.accent+"22",border:`2px solid ${T.accent}44`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🛵</div>
+            <div>
+              <div style={{fontWeight:700,fontFamily:ff,color:T.text,fontSize:14}}>{c.name}</div>
+              <div style={{color:T.muted,fontSize:12}}>★ {c.rating} · {c.del} жеткізу</div>
+              <div style={{color:T.blue,fontSize:12,cursor:"pointer"}} onClick={()=>alert(`📞 ${c.phone}`)}>{c.phone}</div>
+            </div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{marginBottom:4,fontSize:16}}>{c.status} <span style={{fontSize:12,color:T.muted}}>{c.statusText}</span></div>
+            <div style={{color:T.accent,fontWeight:700,fontSize:15}}>{(c.earn||0).toLocaleString()}₸</div>
+          </div>
+        </Crd>)}
+      </div>}
+    </div>
+  </div>;
+}
+
+/* ══ APP ROOT ══ */
+function App(){
+  const[dark,setDark]=useLS("ffg_dark",true);
+  const[lang,setLang]=useLS("ffg_lang","ru");
+  const[page,setPage]=useState("home");
+  const[rest,setRest]=useState(null);
+  const[cart,setCart]=useState(()=>lsGet("ffg_cart",{}));
+  const[user,setUserState]=useState(()=>lsGet("ffg_user",null));
+  const[restaurants,setRestaurantsState]=useState(()=>lsGet("ffg_restaurants",INIT_RESTAURANTS));
+  const[toast,setToast]=useState(null);
+  const T=getT(dark);
+  const L=TR[lang]||TR.ru;
+
+  useEffect(()=>{document.body.style.background=T.bg;document.body.style.color=T.text;},[dark]);
+
+  const setRestaurants=useCallback(val=>{
+    const newVal=typeof val==="function"?val(lsGet("ffg_restaurants",INIT_RESTAURANTS)):val;
+    setRestaurantsState(newVal);lsSet("ffg_restaurants",newVal);
+  },[]);
+
+  const updateUser=useCallback(updated=>{
+    setUserState(updated);lsSet("ffg_user",updated);
+    const users=lsGet("ffg_users",[]);
+    lsSet("ffg_users",users.map(u=>u.id===updated.id?updated:u));
+  },[]);
+
+  const onLogin=useCallback(u=>{setUserState(u);lsSet("ffg_user",u);},[]);
+  const doLogout=useCallback(()=>{setUserState(null);lsSet("ffg_user",null);setPage("home");window.scrollTo(0,0);},[]);
+
+  const addOrderToUser=useCallback(order=>{
+    const currentUser=lsGet("ffg_user",null);
+    if(!currentUser||currentUser.isAdmin)return;
+    const updated={...currentUser,orders:[order,...(currentUser.orders||[])]};
+    updateUser(updated);
+  },[updateUser]);
+
+  const nav=useCallback((p,data=null)=>{
+    if(p==="restaurant"&&data)setRest(data);
+    setPage(p);window.scrollTo(0,0);
+  },[]);
+
+  const addToast=useCallback(msg=>{setToast(msg);setTimeout(()=>setToast(null),2800);},[]);
+  const cartCount=Object.keys(cart).filter(k=>k!=="_items").reduce((a,k)=>a+cart[k],0);
+
+  return <ThemeCtx.Provider value={{dark,setDark,lang,setLang,L}}>
+    {toast&&<Toast msg={toast} onClose={()=>setToast(null)}/>}
+    {page==="home"&&<HomePage nav={nav} cart={cart} user={user} restaurants={restaurants} doLogout={doLogout}/>}
+    {page==="restaurant"&&rest&&<RestaurantPage restaurant={rest} nav={nav} cart={cart} setCart={setCart} addToast={addToast} user={user} updateUser={updateUser}/>}
+    {page==="cart"&&<CartPage nav={nav} cart={cart} setCart={setCart} user={user} updateUser={updateUser} addOrderToUser={addOrderToUser}/>}
+    {page==="tracking"&&<TrackingPage nav={nav}/>}
+    {page==="account"&&<AccountPage nav={nav} user={user} updateUser={updateUser} doLogout={doLogout} restaurants={restaurants}/>}
+    {page==="login"&&<AuthPage nav={nav} onLogin={onLogin} initMode="login"/>}
+    {page==="register"&&<AuthPage nav={nav} onLogin={onLogin} initMode="register"/>}
+    {page==="admin-login"&&<AdminLoginPage nav={nav} onLogin={onLogin}/>}
+    {page==="admin"&&<AdminPage nav={nav} user={user} restaurants={restaurants} setRestaurants={setRestaurants} doLogout={doLogout}/>}
+  </ThemeCtx.Provider>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
